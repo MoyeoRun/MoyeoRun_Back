@@ -29,6 +29,48 @@ export class OauthService {
     }
   }
 
+  async naverGetUser(accessToken: any) {
+    try {
+      const user = await axios({
+        url: 'https://openapi.naver.com/v1/nid/me',
+        headers: {
+          Accept: '*/*',
+          'Content-Type': 'application/xml',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      return user.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        throw new HttpException(error.response.data.msg, error.response.status);
+      } else {
+        throw new HttpException('Wrong Type', 500);
+      }
+    }
+  }
+
+  async googleGetUser(accessToken: any) {
+    try {
+      const user = await axios({
+        url: 'https://www.googleapis.com/oauth2/v2/userinfo',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      return user.data;
+    } catch (error: any) {
+      console.error(error);
+      if (axios.isAxiosError(error)) {
+        throw new HttpException(error.response.data.msg, error.response.status);
+      } else {
+        throw new HttpException('Wrong Type', 500);
+      }
+    }
+  }
+
   async authentication(
     oauthUserRequest: OauthUserRequest,
   ): Promise<OauthResponse> {
