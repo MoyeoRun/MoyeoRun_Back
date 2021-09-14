@@ -43,7 +43,7 @@ export class OauthService {
       return user.data;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        throw new HttpException(error.response.data.msg, error.response.status);
+        throw new HttpException(error.response.data, error.response.status);
       } else {
         throw new HttpException('Wrong Type', 500);
       }
@@ -62,9 +62,8 @@ export class OauthService {
 
       return user.data;
     } catch (error: any) {
-      console.error(error);
       if (axios.isAxiosError(error)) {
-        throw new HttpException(error.response.data.msg, error.response.status);
+        throw new HttpException(error.response.data, error.response.status);
       } else {
         throw new HttpException('Wrong Type', 500);
       }

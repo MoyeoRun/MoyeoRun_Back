@@ -14,4 +14,11 @@ export class UserDao {
   async findByEmail(email: Prisma.UserWhereUniqueInput): Promise<User | null> {
     return this.userRepository.findOne(email);
   }
+
+  async updateByEmail(
+    email: Prisma.UserWhereUniqueInput,
+    data: Prisma.UserUpdateInput,
+  ): Promise<User | null> {
+    return this.userRepository.updateOne(email, data);
+  }
 }

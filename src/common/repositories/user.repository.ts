@@ -20,4 +20,14 @@ export class UserRepository {
       where: userWhereUniqueInput,
     });
   }
+
+  async updateOne(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+    userUpdateInput: Prisma.UserUpdateInput,
+  ): Promise<User | null> {
+    return this.prisma.user.update({
+      where: userWhereUniqueInput,
+      data: userUpdateInput,
+    });
+  }
 }
