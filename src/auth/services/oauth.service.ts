@@ -1,13 +1,15 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { UserDao } from 'src/user/user.dao';
-import { UserForAuth } from '../../user/vo/user.vo';
+import { UserRepository } from 'src/user/user.repository';
 import { OauthResponse, OauthUserRequest } from '../dto/oauth.dto';
 import { AuthService } from './auth.service';
 
 @Injectable()
 export class OauthService {
-  constructor(private userDao: UserDao, private authService: AuthService) {}
+  constructor(
+    private userRepository: UserRepository,
+    private authService: AuthService,
+  ) {}
 
   async kakaoGetUser(accessToken: any) {
     try {
@@ -75,13 +77,13 @@ export class OauthService {
   ): Promise<OauthResponse> {
     try {
       let isNewUser = false;
-      let user: UserForAuth = await this.userDao.findByEmail({
+      let user = await this.userRepository.findByEmail({
         email: oauthUserRequest.email,
       });
 
       if (user == undefined) {
         isNewUser = true;
-        user = await this.userDao.create(oauthUserRequest);
+        user = await this.userRepository.create(oauthUserRequest);
       }
 
       const oauthResponse: OauthResponse = {

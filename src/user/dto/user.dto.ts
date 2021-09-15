@@ -1,12 +1,4 @@
-import { IsEmail, IsNumber, IsString } from 'class-validator';
-
-export class CreateUserRequest {
-  @IsString()
-  name: string;
-
-  @IsEmail()
-  email: string;
-}
+import { IsNumber, IsString } from 'class-validator';
 
 export class UpdateUserRequest {
   @IsNumber()

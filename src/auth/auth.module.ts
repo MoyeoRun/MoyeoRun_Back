@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { jwtConstants } from 'src/config/passport.config';
-import { UserModule } from 'src/user/user.module';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { UserRepository } from 'src/user/user.repository';
 import { OauthController } from './controllers/oauth.controller';
 import { GoogleStrategy } from './passport/google.strategy';
 import { JwtStrategy } from './passport/jwt.strategy';
@@ -13,7 +14,7 @@ import { OauthService } from './services/oauth.service';
 
 @Module({
   imports: [
-    UserModule,
+    PrismaModule.import([UserRepository]),
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
