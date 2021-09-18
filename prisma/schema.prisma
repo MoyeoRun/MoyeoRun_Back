@@ -14,8 +14,8 @@ model User {
   id     Int    @id @default(autoincrement())
   name   String
   email  String @unique
-  height Float
-  weight Float
+  height Float?
+  weight Float?
 
   @@map("user")
 }

@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import nestConfig from './config/nest.config';
 import { PrismaModule } from './prisma/prisma.module';
@@ -9,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ConfigModule.forRoot({
       load: [nestConfig],
     }),
+    AuthModule,
     PrismaModule,
   ],
 })
