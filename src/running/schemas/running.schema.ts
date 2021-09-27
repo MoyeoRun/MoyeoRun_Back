@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsNumber, IsObject, IsString } from 'class-validator';
 import { Document } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { getKstTime } from 'src/common/utils/dayUtil';
 import { RunningDataDto } from './../dto/running.dto';
 import { SingleRunningResponseDto } from './../dto/single-running.dto';
 
@@ -42,7 +41,7 @@ export class Runnings extends Document {
   runDistance: number;
 
   @Prop({
-    default: getKstTime(),
+    required: true,
   })
   createdAt: Date;
 
@@ -53,6 +52,14 @@ export class Runnings extends Document {
 }
 
 const _RunningSchema = SchemaFactory.createForClass(Runnings);
+
+_RunningSchema.virtual('id').set(function (this: Runnings) {
+  return this._id.toHexString();
+});
+_RunningSchema.set('toJSON', {
+  virtuals: true,
+});
+_RunningSchema.set('toObject', { virtuals: true });
 
 _RunningSchema.virtual('responseData').get(function (this: Runnings) {
   return {
