@@ -12,6 +12,11 @@ async function bootstrap() {
   prismaService.enableShutdownHooks(app);
   app.useGlobalPipes(new ValidationPipe());
   const nestConfig = app.get(ConfigService);
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+
   await app.listen(nestConfig.get('port'), nestConfig.get('host'));
 }
 

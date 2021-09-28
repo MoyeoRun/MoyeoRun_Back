@@ -1,8 +1,10 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
+import { getKstTime } from 'src/common/utils/dayUtil';
 import { RunningDataDto } from './dto/running.dto';
+import { updateRunningDatebaseDto } from './dto/single-running.dto';
 import { Runnings } from './schemas/running.schema';
 
 @Injectable()
@@ -16,21 +18,35 @@ export class RunningRespository {
     user: DeserializeAccessToken,
     runData: RunningDataDto,
   ): Promise<Runnings> {
-    try {
-      return await this.runningModel.create({ type, user, runData });
-    } catch (err) {
-      console.error(err);
-      throw new HttpException('db Error', 500);
-    }
+    return await this.runningModel.create({
+      type,
+      user,
+      runData,
+      createdAt: getKstTime(),
+    });
   }
 
   async findById(id: string): Promise<Runnings> {
-    try {
-      console.log(id);
-      return await this.runningModel.findOne().where({ _id: id });
-    } catch (err) {
-      console.error(err);
-      throw new HttpException('db Error', 500);
-    }
+    return await this.runningModel.findOne().where({ _id: id });
+  }
+
+  async updateOneRunning({
+    id,
+    runDistance,
+    runPace,
+    runData,
+  }: updateRunningDatebaseDto): Promise<Runnings> {
+    return await this.runningModel.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          runDistance,
+          runPace,
+        },
+        $push: {
+          runData,
+        },
+      },
+    );
   }
 }

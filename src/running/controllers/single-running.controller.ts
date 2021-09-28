@@ -2,6 +2,7 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from 'src/user/decorators/user.decorator';
+import { RunningRequestDto } from '../dto/running.dto';
 import {
   SingleRunningResponseDto,
   SingleRunningStartRequestDto,
@@ -19,5 +20,11 @@ export class SingleRunningController {
     @Body() body: SingleRunningStartRequestDto,
   ): Promise<SingleRunningResponseDto> {
     return this.singleRunningService.runStart(user, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('running')
+  running(@Body() body: RunningRequestDto) {
+    return this.singleRunningService.running(body);
   }
 }

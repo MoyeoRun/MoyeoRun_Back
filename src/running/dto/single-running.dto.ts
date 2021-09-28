@@ -1,6 +1,7 @@
 import { PickType } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
 import { Runnings } from '../schemas/running.schema';
+import { RunningDataDto } from './running.dto';
 
 export class SingleRunningStartRequestDto {
   @IsNumber()
@@ -20,3 +21,11 @@ export class SingleRunningResponseDto extends PickType(Runnings, [
   'createdAt',
   'runData',
 ] as const) {}
+
+export class updateRunningDatebaseDto extends PickType(Runnings, [
+  'id',
+  'runPace',
+  'runDistance',
+] as const) {
+  runData: RunningDataDto;
+}
