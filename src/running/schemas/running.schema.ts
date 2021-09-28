@@ -21,10 +21,10 @@ export class Runnings extends Document {
 
   @Prop({
     require: false,
-    default: '0',
+    default: 0,
   })
   @IsString()
-  runTime: string;
+  runTime: number;
 
   @Prop({
     require: false,

@@ -34,7 +34,6 @@ export class SingleRunningService {
 
   async running(body: RunningRequestDto): Promise<SingleRunningResponseDto> {
     try {
-      console.log(body);
       const findRunning = await this.runningRepository.findById(body.id);
       if (!findRunning) {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
@@ -77,6 +76,30 @@ export class SingleRunningService {
         throw new HttpException('DB Error', 500);
       }
 
+      return updateRunning.responseData;
+    } catch (err) {
+      console.error(err);
+      throw new BadRequestException('BadRequest');
+    }
+  }
+
+  async runEnd(id: string): Promise<SingleRunningResponseDto> {
+    try {
+      const findRunning = await this.runningRepository.findById(id);
+      if (!findRunning) {
+        throw new HttpException('러닝이 존재하지 않습니다', 400);
+      }
+      const lastRunData = findRunning.runData[findRunning.runData.length - 1];
+      const TotalrunTime = lastRunData.currentPace * findRunning.runDistance;
+
+      const updateRunning = await this.runningRepository.updateRunningEnd(
+        id,
+        TotalrunTime,
+      );
+
+      if (!updateRunning) {
+        throw new HttpException('DB Error', 500);
+      }
       return updateRunning.responseData;
     } catch (err) {
       console.error(err);

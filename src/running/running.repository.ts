@@ -49,4 +49,15 @@ export class RunningRespository {
       },
     );
   }
+
+  async updateRunningEnd(id: string, runTime: number): Promise<Runnings> {
+    return await this.runningModel.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          runTime,
+        },
+      },
+    );
+  }
 }

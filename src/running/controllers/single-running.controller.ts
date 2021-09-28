@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from 'src/user/decorators/user.decorator';
@@ -24,7 +31,13 @@ export class SingleRunningController {
 
   @UseGuards(JwtAuthGuard)
   @Post('running')
-  running(@Body() body: RunningRequestDto) {
+  running(@Body() body: RunningRequestDto): Promise<SingleRunningResponseDto> {
     return this.singleRunningService.running(body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  runEnd(@Param('id') id: string): Promise<SingleRunningResponseDto> {
+    return this.singleRunningService.runEnd(id);
   }
 }
