@@ -42,7 +42,11 @@ export class AuthService {
     };
 
     const refreshToken = await this.jwtService.signAsync({ user }, options);
-    await this.authRepository.createRefreshToken(tokenId, refreshToken);
+    await this.authRepository.createRefreshToken(
+      tokenId,
+      refreshToken,
+      60 * 60 * 24 * 30,
+    );
 
     return refreshToken;
   }

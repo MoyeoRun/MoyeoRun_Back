@@ -12,7 +12,7 @@ export class OauthController {
 
   @UseGuards(KakaoOauthGuard)
   @Post('kakao')
-  async kakao(@User() user: OauthUserRequest): Promise<any> {
+  async kakao(@User() user: OauthUserRequest): Promise<OauthResponse> {
     return this.oauthService.authentication(user);
   }
 

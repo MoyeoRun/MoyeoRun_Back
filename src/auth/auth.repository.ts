@@ -5,10 +5,8 @@ import { Cache } from 'cache-manager';
 export class AuthRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async createRefreshToken(uuid: string, token: string) {
-    return this.cacheManager.set(uuid, token, {
-      ttl: 60 * 60 * 24 * 30,
-    });
+  async createRefreshToken(uuid: string, token: string, ttl: number) {
+    return this.cacheManager.set(uuid, token, { ttl });
   }
 
   async getStoredRefreshToken(uuid: string): Promise<string> {
