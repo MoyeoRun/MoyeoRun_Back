@@ -1,5 +1,6 @@
+import { User } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
-import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
+import { SerializeAccessToken } from 'src/auth/dto/auth.dto';
 import { UpdateUserRequest, UpdateUserResponse } from '../dto/user.dto';
 import { UserRepository } from '../user.repository';
 
@@ -7,10 +8,17 @@ import { UserRepository } from '../user.repository';
 export class UserService {
   constructor(private userRepository: UserRepository) {}
 
-  updateProfile(
-    user: DeserializeAccessToken,
+  async updateProfile(
+    user: SerializeAccessToken,
     updateUserRequest: UpdateUserRequest,
   ): Promise<UpdateUserResponse> {
-    return this.userRepository.updateByEmail(user, updateUserRequest);
+    return this.userRepository.updateByEmail(
+      { id: user.id },
+      updateUserRequest,
+    );
+  }
+
+  async findByEmail(user: SerializeAccessToken): Promise<User> {
+    return this.userRepository.findByEmail(user);
   }
 }

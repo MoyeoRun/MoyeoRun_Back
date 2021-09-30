@@ -1,11 +1,25 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export class CreateUserRequest {
+  @IsString()
+  name: string;
+
+  @IsEmail()
+  email: string;
+}
 
 export class UpdateUserRequest {
-  @IsNumber()
-  height: number;
+  @IsOptional()
+  @IsString()
+  name?: string;
 
+  @IsOptional()
   @IsNumber()
-  weight: number;
+  height?: number;
+
+  @IsOptional()
+  @IsNumber()
+  weight?: number;
 }
 
 export class UpdateUserResponse {
