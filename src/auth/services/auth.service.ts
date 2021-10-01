@@ -4,7 +4,7 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import { UserService } from 'src/user/services/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthRepository } from '../auth.repository';
-import { AuthResponse, SerializeAccessToken } from '../dto/auth.dto';
+import { AuthResponse, DeserializeAccessToken } from '../dto/auth.dto';
 
 const BASE_OPTION: JwtSignOptions = {
   issuer: 'moyeorun.paas-ta.org',
@@ -25,7 +25,7 @@ export class AuthService {
     return false;
   }
 
-  async generateAccessToken(user: SerializeAccessToken): Promise<string> {
+  async generateAccessToken(user: DeserializeAccessToken): Promise<string> {
     const options: JwtSignOptions = {
       ...BASE_OPTION,
     };
@@ -33,7 +33,7 @@ export class AuthService {
     return this.jwtService.signAsync({ user }, options);
   }
 
-  async generateRefreshToken(user: SerializeAccessToken): Promise<string> {
+  async generateRefreshToken(user: DeserializeAccessToken): Promise<string> {
     const tokenId = uuidv4();
     const options: JwtSignOptions = {
       ...BASE_OPTION,
@@ -59,7 +59,7 @@ export class AuthService {
       throw new HttpException('Access token malformed', 401);
     }
 
-    const user: SerializeAccessToken = payload.user;
+    const user: DeserializeAccessToken = payload.user;
 
     if (!user) {
       throw new HttpException('Access token malformed', 401);
@@ -67,7 +67,7 @@ export class AuthService {
   }
 
   async resolveRefreshToken(payload: any): Promise<{
-    user: SerializeAccessToken;
+    user: DeserializeAccessToken;
     tokenId: string;
   }> {
     const tokenId = payload.jti;
@@ -83,7 +83,7 @@ export class AuthService {
       throw new HttpException('Refresh token not found', 401);
     }
 
-    const user: SerializeAccessToken = payload.user;
+    const user: DeserializeAccessToken = payload.user;
 
     if (!user) {
       throw new HttpException('Refresh token malformed', 401);
@@ -111,7 +111,7 @@ export class AuthService {
     return accessToken;
   }
 
-  async login(user: SerializeAccessToken): Promise<AuthResponse> {
+  async login(user: DeserializeAccessToken): Promise<AuthResponse> {
     const refreshToken = await this.generateRefreshToken(user);
     const accessToken = await this.generateAccessToken(user);
 

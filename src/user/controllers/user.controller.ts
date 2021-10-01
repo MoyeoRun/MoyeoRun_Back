@@ -1,6 +1,6 @@
 import { Body, Controller, Patch, UseGuards } from '@nestjs/common';
 import { User } from 'src/auth/decorators/auth.decorator';
-import { SerializeAccessToken } from 'src/auth/dto/auth.dto';
+import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
 import { UpdateUserRequest, UpdateUserResponse } from '../dto/user.dto';
 import { UserService } from '../services/user.service';
@@ -12,7 +12,7 @@ export class UserController {
   @UseGuards(JwtAccessAuthGuard)
   @Patch('/')
   async update(
-    @User() user: SerializeAccessToken,
+    @User() user: DeserializeAccessToken,
     @Body() updateUserRequest: UpdateUserRequest,
   ): Promise<UpdateUserResponse> {
     return this.userService.updateProfile(user, updateUserRequest);

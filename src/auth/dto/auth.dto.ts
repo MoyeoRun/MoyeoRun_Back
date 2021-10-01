@@ -8,7 +8,7 @@ export class AuthResponse {
   refreshToken: string;
 }
 
-export class SerializeAccessToken {
+export class DeserializeAccessToken {
   @IsInt()
   id: number;
 
@@ -16,7 +16,7 @@ export class SerializeAccessToken {
   email: string;
 }
 
-export class SerializeRefreshToken {
+export class DeserializeRefreshToken {
   @IsInt()
   id: number;
 

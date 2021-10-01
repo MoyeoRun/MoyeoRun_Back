@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
 import { RefreshPayload } from '../decorators/auth.decorator';
-import { AuthResponse, SerializeRefreshToken } from '../dto/auth.dto';
+import { AuthResponse, DeserializeRefreshToken } from '../dto/auth.dto';
 import { JwtRefreshAuthGuard } from '../guards/refresh-jwt-auth.guard';
 import { AuthService } from '../services/auth.service';
 
@@ -11,7 +11,7 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   @Post('refresh')
   async refreshAccessToken(
-    @RefreshPayload() payload: SerializeRefreshToken,
+    @RefreshPayload() payload: DeserializeRefreshToken,
   ): Promise<AuthResponse> {
     await this.authService.deleteRefreshToken(payload.tokenId);
     return this.authService.login(payload);
@@ -19,7 +19,9 @@ export class AuthController {
 
   @UseGuards(JwtRefreshAuthGuard)
   @Post('logout')
-  async logout(@RefreshPayload() payload: SerializeRefreshToken): Promise<any> {
+  async logout(
+    @RefreshPayload() payload: DeserializeRefreshToken,
+  ): Promise<any> {
     await this.authService.deleteRefreshToken(payload.tokenId);
     return { message: 'Logout 성공' };
   }

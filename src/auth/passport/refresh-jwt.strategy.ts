@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { jwtConstants } from 'src/config/passport.config';
-import { SerializeRefreshToken } from '../dto/auth.dto';
+import { DeserializeRefreshToken } from '../dto/auth.dto';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
@@ -15,17 +15,17 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     });
   }
 
-  async validate(payload: any): Promise<SerializeRefreshToken> {
+  async validate(payload: any): Promise<DeserializeRefreshToken> {
     const { user, tokenId } = await this.authService.resolveRefreshToken(
       payload,
     );
 
-    const serializeRefreshToken: SerializeRefreshToken = {
+    const DeserializeRefreshToken: DeserializeRefreshToken = {
       id: user.id,
       email: user.email,
       tokenId,
     };
 
-    return serializeRefreshToken;
+    return DeserializeRefreshToken;
   }
 }
