@@ -5,7 +5,11 @@ import { Cache } from 'cache-manager';
 export class AuthRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async createRefreshToken(uuid: string, token: string, ttl: number) {
+  async createRefreshToken(
+    uuid: string,
+    token: string,
+    ttl: number,
+  ): Promise<string> {
     return this.cacheManager.set(uuid, token, { ttl });
   }
 
@@ -13,7 +17,7 @@ export class AuthRepository {
     return this.cacheManager.get(uuid);
   }
 
-  async deleteRefreshToken(uuid: string) {
+  async deleteRefreshToken(uuid: string): Promise<string> {
     return this.cacheManager.del(uuid);
   }
 }
