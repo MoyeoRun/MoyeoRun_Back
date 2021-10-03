@@ -44,6 +44,5 @@ import { OauthService } from './services/oauth.service';
     AuthRepository,
   ],
   controllers: [OauthController, AuthController],
-  exports: [JwtAccessStrategy, JwtRefreshStrategy, JwtModule],
 })
 export class AuthModule {}
