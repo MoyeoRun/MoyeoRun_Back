@@ -18,13 +18,6 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  async validateToken(token: string): Promise<boolean> {
-    const { user } = await this.jwtService.verifyAsync(token);
-    const isUserExist = this.userService.findByEmail(user);
-    if (isUserExist) return true;
-    return false;
-  }
-
   async generateAccessToken(user: DeserializeAccessToken): Promise<string> {
     const options: JwtSignOptions = {
       ...BASE_OPTION,
@@ -52,7 +45,6 @@ export class AuthService {
   }
 
   async resolveAccessToken(token: string): Promise<void> {
-    console.log(token);
     const payload = await this.decodeRefreshToken(token);
 
     if (!payload) {
