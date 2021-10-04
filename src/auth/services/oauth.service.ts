@@ -87,7 +87,7 @@ export class OauthService {
       }
 
       const oauthResponse: OauthResponse = {
-        accessToken: this.authService.login(user).accessToken,
+        token: await this.authService.login(user),
         isNewUser,
       };
 

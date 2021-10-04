@@ -16,7 +16,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (!user) {
       throw new UnauthorizedException();
     }
-    console.log(user);
     return {
       name: user.name,
       email: user.email,

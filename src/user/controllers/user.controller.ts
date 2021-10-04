@@ -1,7 +1,7 @@
 import { Body, Controller, Patch, UseGuards } from '@nestjs/common';
+import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { User } from 'src/user/decorators/user.decorator';
+import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
 import { UpdateUserRequest, UpdateUserResponse } from '../dto/user.dto';
 import { UserService } from '../services/user.service';
 
@@ -9,7 +9,7 @@ import { UserService } from '../services/user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAccessAuthGuard)
   @Patch('/')
   async update(
     @User() user: DeserializeAccessToken,

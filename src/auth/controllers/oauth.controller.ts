@@ -1,5 +1,5 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
-import { User } from 'src/user/decorators/user.decorator';
+import { User } from 'src/auth/decorators/auth.decorator';
 import { OauthResponse, OauthUserRequest } from '../dto/oauth.dto';
 import { GoogleOauthGuard } from '../guards/google-oauth.guard';
 import { KakaoOauthGuard } from '../guards/kakao-oauth.guard';

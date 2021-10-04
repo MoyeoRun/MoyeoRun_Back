@@ -1,4 +1,5 @@
 import { IsBoolean, IsEmail, IsString } from 'class-validator';
+import { AuthResponse } from './auth.dto';
 
 export class OauthRequest {
   @IsString()
@@ -14,8 +15,7 @@ export class OauthUserRequest {
 }
 
 export class OauthResponse {
-  @IsString()
-  accessToken: string;
+  token: AuthResponse;
 
   @IsBoolean()
   isNewUser: boolean;
