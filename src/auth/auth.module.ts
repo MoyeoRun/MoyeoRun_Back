@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import * as redisStore from 'cache-manager-redis-store';
 import { jwtConstants } from 'src/config/passport.config';
+import { redisConstants } from 'src/config/redis.config';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UserService } from 'src/user/services/user.service';
 import { UserRepository } from 'src/user/user.repository';
@@ -22,7 +23,7 @@ import { OauthService } from './services/oauth.service';
   imports: [
     CacheModule.register({
       store: redisStore,
-      host: 'redis',
+      host: redisConstants.url,
       port: 6379,
     }),
     PrismaModule.import([UserRepository]),
