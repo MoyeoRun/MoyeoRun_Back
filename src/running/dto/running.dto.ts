@@ -1,26 +1,15 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsArray, IsString } from 'class-validator';
 
-export class RunningDataDto {
-  @IsNumber()
+export type runData = {
   latitude: number;
 
-  @IsNumber()
   longitude: number;
+};
 
-  @IsString()
-  currentDistance: number;
-
-  @IsString()
-  currentPace: number;
-}
-
-export class RunningRequestDto {
+export class RunningRequest {
   @IsString()
   id: string;
 
-  @IsNumber()
-  latitude: number;
-
-  @IsNumber()
-  longitude: number;
+  @IsArray()
+  runData: runData[];
 }

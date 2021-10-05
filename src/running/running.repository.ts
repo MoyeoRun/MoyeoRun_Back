@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { getKstTime } from 'src/common/utils/dayUtil';
-import { RunningDataDto } from './dto/running.dto';
-import { updateRunningDatebaseDto } from './dto/single-running.dto';
-import { Runnings } from './schemas/running.schema';
+import { getKstTime } from 'src/common/utils/day.util';
+import { updateRunningDatebase } from './dto/single-running.dto';
+import { dbRunData, Runnings } from './schemas/running.schema';
 
 @Injectable()
 export class RunningRespository {
@@ -16,7 +15,7 @@ export class RunningRespository {
   async create(
     type: string,
     user: DeserializeAccessToken,
-    runData: RunningDataDto,
+    runData: dbRunData,
   ): Promise<Runnings> {
     return await this.runningModel.create({
       type,
@@ -35,7 +34,7 @@ export class RunningRespository {
     runDistance,
     runPace,
     runData,
-  }: updateRunningDatebaseDto): Promise<Runnings> {
+  }: updateRunningDatebase): Promise<Runnings> {
     return await this.runningModel.findOneAndUpdate(
       { _id: id },
       {
@@ -44,7 +43,9 @@ export class RunningRespository {
           runPace,
         },
         $push: {
-          runData,
+          runData: {
+            $each: runData,
+          },
         },
       },
     );

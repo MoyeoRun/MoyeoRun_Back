@@ -1,9 +1,8 @@
-import { PickType } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
-import { Runnings } from '../schemas/running.schema';
-import { RunningDataDto } from './running.dto';
+import { IsDate, IsNumber, IsObject, IsString } from 'class-validator';
+import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
+import { dbRunData } from '../schemas/running.schema';
 
-export class SingleRunningStartRequestDto {
+export class SingleRunningStartRequest {
   @IsNumber()
   latitude: number;
 
@@ -11,21 +10,42 @@ export class SingleRunningStartRequestDto {
   longitude: number;
 }
 
-export class SingleRunningResponseDto extends PickType(Runnings, [
-  'user',
-  'type',
-  'id',
-  'runPace',
-  'runTime',
-  'runDistance',
-  'createdAt',
-  'runData',
-] as const) {}
+export class SingleRunningResponse {
+  @IsObject()
+  user: DeserializeAccessToken;
 
-export class updateRunningDatebaseDto extends PickType(Runnings, [
-  'id',
-  'runPace',
-  'runDistance',
-] as const) {
-  runData: RunningDataDto;
+  @IsString()
+  type: string;
+
+  @IsString()
+  id: string;
+
+  @IsNumber()
+  runPace: number;
+
+  @IsNumber()
+  runTime: number;
+
+  @IsDate()
+  createdAt: Date;
+
+  @IsNumber()
+  runDistance: number;
+
+  @IsObject()
+  runData: dbRunData;
+}
+
+export class updateRunningDatebase {
+  @IsString()
+  id: string;
+
+  @IsNumber()
+  runPace: number;
+
+  @IsNumber()
+  runDistance: number;
+
+  @IsObject()
+  runData: dbRunData[];
 }
