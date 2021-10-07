@@ -14,6 +14,11 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   const nestConfig = app.get(ConfigService);
   app.use(cookieParser());
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+
   await app.listen(nestConfig.get('port'), nestConfig.get('host'));
 }
 
