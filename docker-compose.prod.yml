@@ -17,6 +17,15 @@ services:
     ports:
       - 16379:6379
     restart: on-failure
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    restart: on-failure
   main-server:
     container_name: main-server
     build: .
@@ -26,6 +35,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - mongo
     environment:
       - PORT=3000
       - NODE_ENV=dev
