@@ -2,7 +2,7 @@ import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
-import { UpdateUserRequest, userResponse } from '../dto/user.dto';
+import { UpdateUserRequest, UserResponse } from '../dto/user.dto';
 import { UserService } from '../services/user.service';
 
 @Controller('user')
@@ -14,7 +14,7 @@ export class UserController {
   async update(
     @User() user: DeserializeAccessToken,
     @Body() updateUserRequest: UpdateUserRequest,
-  ): Promise<userResponse> {
+  ): Promise<UserResponse> {
     return this.userService.updateProfile(user, updateUserRequest);
   }
 
@@ -22,7 +22,7 @@ export class UserController {
   @Get('/')
   async getUserInfo(
     @User() user: DeserializeAccessToken,
-  ): Promise<userResponse> {
+  ): Promise<UserResponse> {
     return this.userService.findByEmail(user);
   }
 }

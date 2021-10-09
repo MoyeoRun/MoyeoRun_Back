@@ -22,7 +22,7 @@ export class UpdateUserRequest {
   weight?: number;
 }
 
-export class userResponse {
+export class UserResponse {
   @IsString()
   name: string;
 
