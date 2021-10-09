@@ -36,7 +36,7 @@ export class SingleRunningResponse {
   runData: dbRunData;
 }
 
-export class updateRunningDatebase {
+export class updateRunningDatabase {
   @IsString()
   id: string;
 

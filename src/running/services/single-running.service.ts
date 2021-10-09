@@ -8,11 +8,11 @@ import {
   SingleRunningResponse,
   SingleRunningStartRequest,
 } from '../dto/single-running.dto';
-import { RunningRespository } from '../running.repository';
+import { RunningRepository } from '../running.repository';
 
 @Injectable()
 export class SingleRunningService {
-  constructor(private readonly runningRepository: RunningRespository) {}
+  constructor(private readonly runningRepository: RunningRepository) {}
 
   async runStart(
     user: DeserializeAccessToken,
