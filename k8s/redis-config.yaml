@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: example-redis-config
+  name: redis-config
 data:
   redis-config: |
     maxmemory 2gb

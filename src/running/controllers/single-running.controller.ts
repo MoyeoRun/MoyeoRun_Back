@@ -6,9 +6,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { JwtAccessAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { User } from 'src/user/decorators/user.decorator';
+import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
 import { RunningRequest } from '../dto/running.dto';
 import {
   SingleRunningResponse,

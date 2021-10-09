@@ -1,9 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f ./docker-compose.prod.yml
-    kompose.version: 1.24.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: main-server
@@ -16,9 +13,6 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f ./docker-compose.prod.yml
-        kompose.version: 1.24.0 (HEAD)
       creationTimestamp: null
       labels:
         io.kompose.service: main-server
@@ -33,9 +27,13 @@ spec:
           name: main-server
           ports:
             - containerPort: 3000
-          resources: {}
+          resources:
+            requests:
+              memory: '1Gi'
+              cpu: '1000m'
+            limits:
+              memory: '2Gi'
+              cpu: '1500m'
       restartPolicy: Always
-      imagePullSecrets:
-        - name: dockersecret
 
 status: {}
