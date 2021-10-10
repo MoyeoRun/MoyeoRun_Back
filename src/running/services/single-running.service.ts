@@ -120,4 +120,35 @@ export class SingleRunningService {
       throw new BadRequestException('BadRequest');
     }
   }
+
+  async getRunning(id: string): Promise<SingleRunningResponse> {
+    try {
+      const findRunning = await this.runningRepository.findById(id);
+      if (!findRunning) {
+        throw new HttpException('러닝이 존재하지 않습니다', 400);
+      }
+
+      return findRunning.responseData;
+    } catch (err) {
+      console.error(err);
+      throw new BadRequestException('BadRequest');
+    }
+  }
+
+  async getList(
+    user: DeserializeAccessToken,
+  ): Promise<SingleRunningResponse[]> {
+    try {
+      const findRunning = await this.runningRepository.findByUser(user);
+
+      if (!findRunning) {
+        throw new HttpException('러닝이 존재하지 않습니다', 400);
+      }
+
+      return findRunning.map((running) => running.responseData);
+    } catch (err) {
+      console.error(err);
+      throw new BadRequestException('BadRequest');
+    }
+  }
 }

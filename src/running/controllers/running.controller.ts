@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Patch,
   Post,
@@ -16,12 +17,12 @@ import {
 } from '../dto/single-running.dto';
 import { SingleRunningService } from '../services/single-running.service';
 
-@Controller('single-running')
-export class SingleRunningController {
+@Controller('running')
+export class RunningController {
   constructor(private readonly singleRunningService: SingleRunningService) {}
 
   @UseGuards(JwtAccessAuthGuard)
-  @Post()
+  @Post('single')
   runStart(
     @User() user: DeserializeAccessToken,
     @Body() body: SingleRunningStartRequest,
@@ -30,7 +31,7 @@ export class SingleRunningController {
   }
 
   @UseGuards(JwtAccessAuthGuard)
-  @Post('running')
+  @Post()
   running(@Body() body: RunningRequest): Promise<SingleRunningResponse> {
     return this.singleRunningService.running(body);
   }
@@ -39,5 +40,19 @@ export class SingleRunningController {
   @Patch(':id')
   runEnd(@Param('id') id: string): Promise<SingleRunningResponse> {
     return this.singleRunningService.runEnd(id);
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @Get('list')
+  getList(
+    @User() user: DeserializeAccessToken,
+  ): Promise<SingleRunningResponse[]> {
+    return this.singleRunningService.getList(user);
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @Get(':id')
+  getRunning(@Param('id') id: string): Promise<SingleRunningResponse> {
+    return this.singleRunningService.getRunning(id);
   }
 }

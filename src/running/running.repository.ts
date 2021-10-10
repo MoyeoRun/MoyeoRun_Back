@@ -29,6 +29,12 @@ export class RunningRespository {
     return await this.runningModel.findOne().where({ _id: id });
   }
 
+  async findByUser(user: DeserializeAccessToken): Promise<Runnings[]> {
+    return await this.runningModel.find().where({
+      user,
+    });
+  }
+
   async updateOneRunning({
     id,
     runDistance,
@@ -48,6 +54,7 @@ export class RunningRespository {
           },
         },
       },
+      { new: true },
     );
   }
 
@@ -59,6 +66,7 @@ export class RunningRespository {
           runTime,
         },
       },
+      { new: true },
     );
   }
 }
