@@ -1,11 +1,19 @@
-import { IsEmail, IsInt, IsString, IsUUID } from 'class-validator';
+import { IsDate, IsEmail, IsInt, IsString, IsUUID } from 'class-validator';
+
+export class Token {
+  @IsString()
+  token: string;
+
+  @IsDate()
+  expiresIn: Date;
+}
 
 export class AuthResponse {
   @IsString()
-  accessToken: string;
+  accessToken = new Token();
 
   @IsString()
-  refreshToken: string;
+  refreshToken = new Token();
 }
 
 export class DeserializeAccessToken {
