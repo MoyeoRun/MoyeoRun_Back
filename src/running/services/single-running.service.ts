@@ -1,7 +1,6 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import * as dayjs from 'dayjs';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { getKstTime } from 'src/common/utils/day.util';
 import { getDistance } from 'src/common/utils/distance.util';
 import { RunningRequest } from '../dto/running.dto';
 import {
@@ -72,10 +71,7 @@ export class SingleRunningService {
         nextRunDataArray.push(nextRunData);
       }
       //시간 차이 계산(s)
-      const betweenTime = dayjs(getKstTime()).diff(
-        findRunning.createdAt,
-        'second',
-      );
+      const betweenTime = dayjs().diff(findRunning.createdAt, 'second');
       //평균페이스
       const averagePace = betweenTime / newDistance / 60;
 

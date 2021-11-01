@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { getKstTime } from 'src/common/utils/day.util';
 import { updateRunningDatebase } from './dto/single-running.dto';
 import { dbRunData, Runnings } from './schemas/running.schema';
 
@@ -21,7 +20,6 @@ export class RunningRespository {
       type,
       user,
       runData,
-      createdAt: getKstTime(),
     });
   }
 

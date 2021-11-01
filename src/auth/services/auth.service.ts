@@ -1,10 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
+import { addDays, addMinutes } from 'src/common/utils/day.util';
 import { UserService } from 'src/user/services/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthRepository } from '../auth.repository';
-import { AuthResponse, DeserializeAccessToken } from '../dto/auth.dto';
+import { AuthResponse, DeserializeAccessToken, Token } from '../dto/auth.dto';
 
 const BASE_OPTION: JwtSignOptions = {
   issuer: 'moyeorun.paas-ta.org',
@@ -18,15 +19,18 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  async generateAccessToken(user: DeserializeAccessToken): Promise<string> {
+  async generateAccessToken(user: DeserializeAccessToken): Promise<Token> {
     const options: JwtSignOptions = {
       ...BASE_OPTION,
     };
 
-    return this.jwtService.signAsync({ user }, options);
+    return {
+      token: await this.jwtService.signAsync({ user }, options),
+      expiresIn: addMinutes(30),
+    };
   }
 
-  async generateRefreshToken(user: DeserializeAccessToken): Promise<string> {
+  async generateRefreshToken(user: DeserializeAccessToken): Promise<Token> {
     const tokenId = uuidv4();
     const options: JwtSignOptions = {
       ...BASE_OPTION,
@@ -41,7 +45,10 @@ export class AuthService {
       60 * 60 * 24 * 30,
     );
 
-    return refreshToken;
+    return {
+      token: refreshToken,
+      expiresIn: addDays(30),
+    };
   }
 
   async resolveAccessToken(token: string): Promise<void> {
@@ -96,7 +103,7 @@ export class AuthService {
     }
   }
 
-  async createAccessTokenFromRefreshToken(token: string): Promise<string> {
+  async createAccessTokenFromRefreshToken(token: string): Promise<Token> {
     const payload = await this.decodeRefreshToken(token);
     const { user } = await this.resolveRefreshToken(payload);
     const accessToken = await this.generateAccessToken(user);
