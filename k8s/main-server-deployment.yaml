@@ -23,7 +23,7 @@ spec:
           envFrom:
             - secretRef:
                 name: server-secrets
-          image: dnatuna/moyearun-main-server:0.1
+          image: dnatuna/moyearun-main-server:0.0.2
           name: main-server
           ports:
             - containerPort: 3000
@@ -35,5 +35,7 @@ spec:
               memory: '2Gi'
               cpu: '1500m'
       restartPolicy: Always
+      imagePullSecrets:
+        - name: regcred
 
 status: {}

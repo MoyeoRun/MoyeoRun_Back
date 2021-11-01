@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsNumber, IsObject, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsObject, IsString } from 'class-validator';
 import { Document } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { SingleRunningResponse } from './../dto/single-running.dto';
@@ -41,7 +41,9 @@ export class Runnings extends Document {
 
   @Prop({
     required: true,
+    default: Date.now,
   })
+  @IsDate()
   createdAt: Date;
 
   @Prop()

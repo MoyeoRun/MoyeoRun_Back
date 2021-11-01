@@ -5,14 +5,14 @@
 ### 서버 초기화
 
 ```shell
-$ kubectl delete -f main-server-service.yaml,mysql-service.yaml,redis-service.yaml,main-server-deployment.yaml,mysql-deployment.yaml,redis-pod.yaml,mongo-deployment.yaml,mongo-service.yaml
+$ kubectl delete -f k8s/main-server-service.yaml,k8s/mysql-service.yaml,k8s/redis-service.yaml,k8s/main-server-deployment.yaml,k8s/mysql-deployment.yaml,k8s/redis-pod.yaml,k8s/mongo-deployment.yaml,k8s/mongo-service.yaml
 ```
 
 ### 서버 실행 방법
 
 ```shell
 # 1. mysql, redis, mongo paas-ta에 올린다.
-$ kubectl apply -f mysql-deployment.yaml,redis-pod.yaml,mongo-deployment.yaml,redis-service.yaml,mysql-service.yaml,mongo-service.yaml
+$ kubectl apply -f k8s/mysql-deployment.yaml,k8s/redis-pod.yaml,k8s/mongo-deployment.yaml,k8s/redis-service.yaml,k8s/mysql-service.yaml,k8s/mongo-service.yaml
 
 # 2. .env.prod를 수정한다.
 DATABASE_URL=
@@ -30,5 +30,5 @@ $ kubectl delete secrets/server-secrets
 $ kubectl create secret generic server-secrets --from-env-file=./.env.prod
 
 #. 6. main-server를 paas-ta에 올린다.
-$ kubectl apply -f main-server-deployment.yaml,main-server-service.yaml
+$ kubectl apply -f k8s/main-server-deployment.yaml,k8s/main-server-service.yaml
 ```
