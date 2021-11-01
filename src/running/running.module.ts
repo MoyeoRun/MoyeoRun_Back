@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { SingleRunningController } from './controllers/single-running.controller';
+import { RunningController } from './controllers/running.controller';
 import { RunningRespository } from './running.repository';
 import { Runnings, RunningSchema } from './schemas/running.schema';
 import { SingleRunningService } from './services/single-running.service';
@@ -9,7 +9,7 @@ import { SingleRunningService } from './services/single-running.service';
   imports: [
     MongooseModule.forFeature([{ name: Runnings.name, schema: RunningSchema }]),
   ],
-  controllers: [SingleRunningController],
+  controllers: [RunningController],
   providers: [SingleRunningService, RunningRespository],
 })
 export class RunningModule {}
