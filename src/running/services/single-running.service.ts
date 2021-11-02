@@ -4,25 +4,37 @@ import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { getDistance } from 'src/common/utils/distance.util';
 import { RunningRequest } from '../dto/running.dto';
 import {
+  RunningType,
   SingleRunningResponse,
   SingleRunningStartRequest,
 } from '../dto/single-running.dto';
-import { RunningRespository } from '../running.repository';
+import { RunningRepository } from '../running.repository';
 
 @Injectable()
 export class SingleRunningService {
-  constructor(private readonly runningRepository: RunningRespository) {}
+  constructor(private readonly runningRepository: RunningRepository) {}
 
   async runStart(
     user: DeserializeAccessToken,
     body: SingleRunningStartRequest,
   ): Promise<SingleRunningResponse> {
+    if (body.type === RunningType.distance && !body.targetDistance)
+      throw new HttpException('targetDistance is empty.', 400);
+    else if (body.type === RunningType.time && !body.targetTime)
+      throw new HttpException('targetTime is empty.', 400);
     try {
-      const result = await this.runningRepository.create('single', user, {
-        currentDistance: 0,
-        currentPace: 0,
-        ...body,
-      });
+      const result = await this.runningRepository.create(
+        body.type,
+        user,
+        {
+          currentDistance: 0,
+          currentPace: 0,
+          latitude: body.latitude,
+          longitude: body.longitude,
+        },
+        body.targetDistance,
+        body.targetTime,
+      );
 
       return result.responseData;
     } catch (err) {
@@ -100,11 +112,11 @@ export class SingleRunningService {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
       }
       const lastRunData = findRunning.runData[findRunning.runData.length - 1];
-      const TotalrunTime = lastRunData.currentPace * findRunning.runDistance;
+      const TotalRunTime = lastRunData.currentPace * findRunning.runDistance;
 
       const updateRunning = await this.runningRepository.updateRunningEnd(
         id,
-        TotalrunTime,
+        TotalRunTime,
       );
 
       if (!updateRunning) {
@@ -123,7 +135,6 @@ export class SingleRunningService {
       if (!findRunning) {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
       }
-
       return findRunning.responseData;
     } catch (err) {
       console.error(err);

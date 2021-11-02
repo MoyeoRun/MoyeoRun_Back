@@ -19,6 +19,18 @@ export class Runnings extends Document {
   type: string;
 
   @Prop({
+    required: false,
+  })
+  @IsNumber()
+  targetDistance: number;
+
+  @Prop({
+    required: false,
+  })
+  @IsDate()
+  targetTime: number;
+
+  @Prop({
     require: false,
     default: 0,
   })
@@ -67,6 +79,8 @@ _RunningSchema.virtual('responseData').get(function (this: Runnings) {
     id: this.id,
     user: this.user,
     type: this.type,
+    targetDistance: this.targetDistance,
+    targetTime: this.targetTime,
     runPace: this.runPace,
     runTime: this.runTime,
     runDistance: this.runDistance,
