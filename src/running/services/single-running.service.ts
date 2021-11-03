@@ -4,7 +4,6 @@ import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { getDistance } from 'src/common/utils/distance.util';
 import { RunningRequest } from '../dto/running.dto';
 import {
-  RunningType,
   SingleRunningResponse,
   SingleRunningStartRequest,
 } from '../dto/single-running.dto';
@@ -18,10 +17,6 @@ export class SingleRunningService {
     user: DeserializeAccessToken,
     body: SingleRunningStartRequest,
   ): Promise<SingleRunningResponse> {
-    if (body.type === RunningType.distance && !body.targetDistance)
-      throw new HttpException('targetDistance is empty.', 400);
-    else if (body.type === RunningType.time && !body.targetTime)
-      throw new HttpException('targetTime is empty.', 400);
     try {
       const result = await this.runningRepository.create(
         body.type,
@@ -39,7 +34,9 @@ export class SingleRunningService {
       return result.responseData;
     } catch (err) {
       console.error(err);
-      throw new BadRequestException('BadRequest');
+      if (err instanceof HttpException)
+        throw new HttpException(err.message, err.getStatus());
+      else throw new HttpException(err, 500);
     }
   }
 
@@ -116,7 +113,7 @@ export class SingleRunningService {
 
       const updateRunning = await this.runningRepository.updateRunningEnd(
         id,
-        TotalRunTime,
+        TotalRunTime * 60,
       );
 
       if (!updateRunning) {

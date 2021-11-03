@@ -30,7 +30,7 @@ import { OauthService } from './services/oauth.service';
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '30m' },
+      signOptions: { expiresIn: jwtConstants.expiredIn },
     }),
   ],
   providers: [

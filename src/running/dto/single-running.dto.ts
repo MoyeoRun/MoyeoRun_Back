@@ -1,10 +1,12 @@
 import {
   IsDate,
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { dbRunData } from '../schemas/running.schema';
@@ -20,11 +22,13 @@ export class SingleRunningStartRequest {
   @IsEnum(RunningType)
   type: RunningType;
 
-  @IsOptional()
+  @ValidateIf((o) => o.type === RunningType.time)
+  @IsNotEmpty()
   @IsNumber()
   targetTime?: number;
 
-  @IsOptional()
+  @ValidateIf((o) => o.type === RunningType.distance)
+  @IsNotEmpty()
   @IsNumber()
   targetDistance?: number;
 
