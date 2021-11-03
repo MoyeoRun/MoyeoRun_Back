@@ -1,8 +1,37 @@
-import { IsDate, IsNumber, IsObject, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { dbRunData } from '../schemas/running.schema';
 
+export enum RunningType {
+  multi = 'multi',
+  free = 'free',
+  distance = 'distance',
+  time = 'time',
+}
+
 export class SingleRunningStartRequest {
+  @IsEnum(RunningType)
+  type: RunningType;
+
+  @ValidateIf((o) => o.type === RunningType.time)
+  @IsNotEmpty()
+  @IsNumber()
+  targetTime?: number;
+
+  @ValidateIf((o) => o.type === RunningType.distance)
+  @IsNotEmpty()
+  @IsNumber()
+  targetDistance?: number;
+
   @IsNumber()
   latitude: number;
 
@@ -16,6 +45,14 @@ export class SingleRunningResponse {
 
   @IsString()
   type: string;
+
+  @IsOptional()
+  @IsNumber()
+  targetTime?: number;
+
+  @IsOptional()
+  @IsNumber()
+  targetDistance?: number;
 
   @IsString()
   id: string;
@@ -36,7 +73,7 @@ export class SingleRunningResponse {
   runData: dbRunData;
 }
 
-export class updateRunningDatebase {
+export class updateRunningDatabase {
   @IsString()
   id: string;
 
