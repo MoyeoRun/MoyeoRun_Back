@@ -118,11 +118,11 @@ export class SingleRunningService {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
       }
       const lastRunData = findRunning.runData[findRunning.runData.length - 1];
-      const TotalRunTime = lastRunData.currentPace * findRunning.runDistance;
+      const totalRunTime = lastRunData.currentPace * findRunning.runDistance;
 
       const updateRunning = await this.runningRepository.updateRunningEnd(
         id,
-        TotalRunTime * 60,
+        totalRunTime * 60,
       );
 
       if (!updateRunning) {
