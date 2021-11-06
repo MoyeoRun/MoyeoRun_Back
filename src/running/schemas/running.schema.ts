@@ -99,4 +99,6 @@ export type dbRunData = {
   currentDistance: number;
 
   currentPace: number;
+
+  currentTime: Date;
 };

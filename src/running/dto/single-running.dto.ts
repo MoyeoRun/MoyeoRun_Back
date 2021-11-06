@@ -1,5 +1,6 @@
 import {
   IsDate,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -37,6 +38,9 @@ export class SingleRunningStartRequest {
 
   @IsNumber()
   longitude: number;
+
+  @IsDateString()
+  time: Date;
 }
 
 export class SingleRunningResponse {

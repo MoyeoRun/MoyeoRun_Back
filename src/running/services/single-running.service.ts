@@ -1,6 +1,6 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
-import * as dayjs from 'dayjs';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
+import { subTime } from 'src/common/utils/day.util';
 import { getDistance } from 'src/common/utils/distance.util';
 import { RunningRequest } from '../dto/running.dto';
 import {
@@ -8,6 +8,7 @@ import {
   SingleRunningStartRequest,
 } from '../dto/single-running.dto';
 import { RunningRepository } from '../running.repository';
+import { dbRunData } from '../schemas/running.schema';
 
 @Injectable()
 export class SingleRunningService {
@@ -22,6 +23,7 @@ export class SingleRunningService {
         body.type,
         user,
         {
+          currentTime: body.time,
           currentDistance: 0,
           currentPace: 0,
           latitude: body.latitude,
@@ -47,9 +49,9 @@ export class SingleRunningService {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
       }
 
-      let lastRunData;
-      const nextRunDataArray = [];
-      let newDistance;
+      let lastRunData: dbRunData;
+      const currentRunningDataArray: dbRunData[] = [];
+      let currentDistance;
       for (let i = 0; i < body.runData.length; i++) {
         //다음 좌표와의 거리 구하기
         let lastRunDistance;
@@ -57,7 +59,7 @@ export class SingleRunningService {
           lastRunData = findRunning.runData[findRunning.runData.length - 1];
           lastRunDistance = findRunning.runDistance;
         } else {
-          lastRunData = nextRunDataArray[i - 1];
+          lastRunData = currentRunningDataArray[i - 1];
           lastRunDistance = lastRunData.currentDistance;
         }
 
@@ -68,27 +70,34 @@ export class SingleRunningService {
           body.runData[i].longitude,
         );
         //새 거리 계산
-        newDistance = lastRunDistance + distance;
+        currentDistance = lastRunDistance + distance;
         //순간 페이스 구하기 (2초마다 데이터를 주면, 2s/거리)
-        const currentPace = 2 / distance; //distance: km단위,currentPace / 60-> 분 페이스
+        const currentPace =
+          subTime(body.runData[i].time, lastRunData.currentTime) / distance; //distance: km단위,currentPace / 60-> 분 페이스
         const nextRunData = {
           latitude: body.runData[i].latitude,
           longitude: body.runData[i].longitude,
-          currentDistance: newDistance,
+          currentDistance: currentDistance,
           currentPace: currentPace / 60,
+          currentTime: body.runData[i].time,
         };
-        nextRunDataArray.push(nextRunData);
+        currentRunningDataArray.push(nextRunData);
       }
+
       //시간 차이 계산(s)
-      const betweenTime = dayjs().diff(findRunning.createdAt, 'second');
+      const betweenTime = subTime(
+        currentRunningDataArray[currentRunningDataArray.length - 1].currentTime,
+        findRunning.createdAt,
+      );
+
       //평균페이스
-      const averagePace = betweenTime / newDistance / 60;
+      const averagePace = betweenTime / currentDistance / 60;
 
       const updateRunning = await this.runningRepository.updateOneRunning({
         id: body.id,
         runPace: averagePace,
-        runDistance: newDistance,
-        runData: nextRunDataArray,
+        runDistance: currentDistance,
+        runData: currentRunningDataArray,
       });
 
       if (!updateRunning) {
@@ -109,11 +118,11 @@ export class SingleRunningService {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
       }
       const lastRunData = findRunning.runData[findRunning.runData.length - 1];
-      const TotalRunTime = lastRunData.currentPace * findRunning.runDistance;
+      const totalRunTime = lastRunData.currentPace * findRunning.runDistance;
 
       const updateRunning = await this.runningRepository.updateRunningEnd(
         id,
-        TotalRunTime * 60,
+        totalRunTime * 60,
       );
 
       if (!updateRunning) {
