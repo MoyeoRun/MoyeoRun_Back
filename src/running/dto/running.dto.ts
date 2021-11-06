@@ -1,15 +1,15 @@
 import { IsArray, IsString } from 'class-validator';
 
-export type runData = {
+interface RunData {
+  time: Date;
   latitude: number;
-
   longitude: number;
-};
+}
 
 export class RunningRequest {
   @IsString()
   id: string;
 
   @IsArray()
-  runData: runData[];
+  runData: Array<RunData>;
 }
