@@ -30,9 +30,17 @@ export class RunningRepository {
     return await this.runningModel.findOne().where({ _id: id });
   }
 
-  async findByUser(user: DeserializeAccessToken): Promise<Runnings[]> {
-    return await this.runningModel.find().where({
-      user,
+  async findByUserBetweenTerm(
+    user: DeserializeAccessToken,
+    start: Date,
+    end: Date,
+  ): Promise<Runnings[]> {
+    return await this.runningModel.find({
+      user: user,
+      createdAt: {
+        $gte: start,
+        $lte: end,
+      },
     });
   }
 

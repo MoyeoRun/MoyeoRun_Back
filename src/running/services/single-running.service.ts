@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { Connection } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import {
+  RunningListRequest,
   SingleRunningRequest,
   SingleRunningResponse,
 } from '../dto/single-running.dto';
@@ -97,9 +98,14 @@ export class SingleRunningService {
 
   async getList(
     user: DeserializeAccessToken,
+    params: RunningListRequest,
   ): Promise<SingleRunningResponse[]> {
     try {
-      const findRunning = await this.runningRepository.findByUser(user);
+      const findRunning = await this.runningRepository.findByUserBetweenTerm(
+        user,
+        new Date(params.start),
+        new Date(params.end),
+      );
 
       if (!findRunning) {
         throw new HttpException('러닝이 존재하지 않습니다', 400);

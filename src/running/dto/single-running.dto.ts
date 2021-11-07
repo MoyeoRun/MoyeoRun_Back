@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsDate,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -47,6 +48,14 @@ export class SingleRunningResponse extends SingleRunningRequest {
 
   @IsDate()
   createdAt: Date;
+}
+
+export class RunningListRequest {
+  @IsDateString()
+  start: Date;
+
+  @IsDateString()
+  end: Date;
 }
 
 export class updateRunningDatabase {
