@@ -58,6 +58,23 @@ export class RunningListRequest {
   end: Date;
 }
 
+export class RunningListResponse {
+  @IsNumber()
+  totalDistance: number;
+
+  @IsNumber()
+  totalAveragePace: number;
+
+  @IsNumber()
+  totalTime: number;
+
+  @IsObject()
+  analysisRunningListBetweenTerm: analysisRunningListBetweenTerm[];
+
+  @IsObject()
+  runningList: SingleRunningResponse[];
+}
+
 export class updateRunningDatabase {
   @IsString()
   id: string;
@@ -70,4 +87,21 @@ export class updateRunningDatabase {
 
   @IsObject()
   runData: RunDataType[];
+}
+
+export class analysisRunningListBetweenTerm {
+  @IsDate()
+  date: Date;
+
+  @IsNumber()
+  count: number;
+
+  @IsNumber()
+  totalDistanceOfTerm: number;
+
+  @IsNumber()
+  totalTimeOfTerm: number;
+
+  @IsNumber()
+  averagePaceOfTerm: number;
 }

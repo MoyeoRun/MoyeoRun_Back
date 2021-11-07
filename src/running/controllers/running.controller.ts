@@ -12,6 +12,7 @@ import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
 import {
   RunningListRequest,
+  RunningListResponse,
   SingleRunningRequest,
   SingleRunningResponse,
 } from '../dto/single-running.dto';
@@ -35,7 +36,7 @@ export class RunningController {
   getList(
     @User() user: DeserializeAccessToken,
     @Query() params: RunningListRequest,
-  ): Promise<SingleRunningResponse[]> {
+  ): Promise<RunningListResponse> {
     return this.singleRunningService.getList(user, params);
   }
 

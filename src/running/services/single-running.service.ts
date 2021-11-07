@@ -5,6 +5,7 @@ import { Connection } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import {
   RunningListRequest,
+  RunningListResponse,
   SingleRunningRequest,
   SingleRunningResponse,
 } from '../dto/single-running.dto';
@@ -99,7 +100,7 @@ export class SingleRunningService {
   async getList(
     user: DeserializeAccessToken,
     params: RunningListRequest,
-  ): Promise<SingleRunningResponse[]> {
+  ): Promise<RunningListResponse> {
     try {
       const findRunning = await this.runningRepository.findByUserBetweenTerm(
         user,
@@ -111,7 +112,35 @@ export class SingleRunningService {
         throw new HttpException('러닝이 존재하지 않습니다', 400);
       }
 
-      return findRunning.map((running) => running.responseData);
+      const analysisRunningListBetweenTerm =
+        await this.runningRepository.countByCreatedAtBetweenTerm(
+          new Date(params.start),
+          new Date(params.end),
+        );
+
+      let totalDistance = 0,
+        totalTime = 0,
+        totalAveragePace = 0;
+
+      analysisRunningListBetweenTerm.map((data) => {
+        totalDistance += data.totalDistanceOfTerm;
+        totalTime += data.totalTimeOfTerm;
+        totalAveragePace += data.averagePaceOfTerm;
+      });
+      totalAveragePace /= analysisRunningListBetweenTerm.length;
+
+      const runningListResponse: RunningListResponse = {
+        totalTime,
+        totalDistance,
+        totalAveragePace,
+        analysisRunningListBetweenTerm,
+        runningList: [],
+      };
+      findRunning.map((running) =>
+        runningListResponse.runningList.push(running.responseData),
+      );
+
+      return runningListResponse;
     } catch (err) {
       console.error(err);
       throw new BadRequestException('BadRequest');

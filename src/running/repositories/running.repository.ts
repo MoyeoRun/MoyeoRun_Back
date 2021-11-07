@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import {
+  analysisRunningListBetweenTerm,
   SingleRunningRequest,
   updateRunningDatabase,
 } from '../dto/single-running.dto';
@@ -77,5 +78,39 @@ export class RunningRepository {
       },
       { new: true },
     );
+  }
+
+  async countByCreatedAtBetweenTerm(
+    start: Date,
+    end: Date,
+  ): Promise<analysisRunningListBetweenTerm[]> {
+    return await this.runningModel.aggregate([
+      { $match: { createdAt: { $gte: start, $lte: end } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            day: { $dayOfMonth: '$createdAt' },
+          },
+          count: { $sum: 1 },
+          distance: { $sum: '$runDistance' },
+          time: { $sum: '$runTime' },
+          pace: { $avg: '$runPace' },
+          first: { $min: '$createdAt' },
+        },
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          date: '$first',
+          count: 1,
+          totalDistanceOfTerm: '$distance',
+          totalTimeOfTerm: '$time',
+          averagePaceOfTerm: '$pace',
+          _id: 0,
+        },
+      },
+    ]);
   }
 }
