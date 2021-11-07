@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { updateRunningDatabase } from './dto/single-running.dto';
-import { dbRunData, Runnings } from './schemas/running.schema';
+import {
+  SingleRunningRequest,
+  updateRunningDatabase,
+} from '../dto/single-running.dto';
+import { Runnings } from '../schemas/runnings.schema';
 
 @Injectable()
 export class RunningRepository {
@@ -12,18 +15,14 @@ export class RunningRepository {
   ) {}
 
   async create(
-    type: string,
+    data: SingleRunningRequest,
     user: DeserializeAccessToken,
-    runData: dbRunData,
-    targetDistance?: number,
-    targetTime?: number,
+    session: ClientSession,
   ): Promise<Runnings> {
     return await this.runningModel.create({
-      type,
-      targetDistance,
-      targetTime,
+      ...data,
       user,
-      runData,
+      $session: session,
     });
   }
 

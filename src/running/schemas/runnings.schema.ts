@@ -1,22 +1,23 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsDate, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsObject } from 'class-validator';
 import { Document } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { SingleRunningResponse } from './../dto/single-running.dto';
+import { SingleRunningResponse } from '../dto/single-running.dto';
+import { RunDataType, RunningType } from '../running.type';
 
 @Schema()
 export class Runnings extends Document {
   @Prop({
-    require: true,
+    required: true,
   })
   @IsObject()
   user: DeserializeAccessToken;
 
   @Prop({
-    require: true,
+    required: true,
   })
-  @IsString()
-  type: string;
+  @IsEnum(RunningType)
+  type: RunningType;
 
   @Prop({
     required: false,
@@ -31,21 +32,21 @@ export class Runnings extends Document {
   targetTime: number;
 
   @Prop({
-    require: false,
+    required: false,
     default: 0,
   })
   @IsNumber()
   runTime: number;
 
   @Prop({
-    require: false,
+    required: false,
     default: 0,
   })
   @IsNumber()
   runPace: number;
 
   @Prop({
-    require: false,
+    required: false,
     default: 0,
   })
   @IsNumber()
@@ -59,7 +60,7 @@ export class Runnings extends Document {
   createdAt: Date;
 
   @Prop()
-  runData: dbRunData[];
+  runData: RunDataType[][] | RunDataType[];
 
   readonly responseData: SingleRunningResponse;
 }
@@ -90,15 +91,3 @@ _RunningSchema.virtual('responseData').get(function (this: Runnings) {
 });
 
 export const RunningSchema = _RunningSchema;
-
-export type dbRunData = {
-  latitude: number;
-
-  longitude: number;
-
-  currentDistance: number;
-
-  currentPace: number;
-
-  currentTime: Date;
-};

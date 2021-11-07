@@ -1,25 +1,17 @@
 import {
+  IsArray,
   IsDate,
-  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsObject,
-  IsOptional,
   IsString,
   ValidateIf,
 } from 'class-validator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { dbRunData } from '../schemas/running.schema';
+import { RunDataType, RunningType } from '../running.type';
 
-export enum RunningType {
-  multi = 'multi',
-  free = 'free',
-  distance = 'distance',
-  time = 'time',
-}
-
-export class SingleRunningStartRequest {
+export class SingleRunningRequest {
   @IsEnum(RunningType)
   type: RunningType;
 
@@ -34,47 +26,27 @@ export class SingleRunningStartRequest {
   targetDistance?: number;
 
   @IsNumber()
-  latitude: number;
-
-  @IsNumber()
-  longitude: number;
-
-  @IsDateString()
-  time: Date;
-}
-
-export class SingleRunningResponse {
-  @IsObject()
-  user: DeserializeAccessToken;
-
-  @IsString()
-  type: string;
-
-  @IsOptional()
-  @IsNumber()
-  targetTime?: number;
-
-  @IsOptional()
-  @IsNumber()
-  targetDistance?: number;
-
-  @IsString()
-  id: string;
-
-  @IsNumber()
   runPace: number;
 
   @IsNumber()
   runTime: number;
 
-  @IsDate()
-  createdAt: Date;
-
   @IsNumber()
   runDistance: number;
 
+  @IsArray()
+  runData: RunDataType[][] | RunDataType[];
+}
+
+export class SingleRunningResponse extends SingleRunningRequest {
   @IsObject()
-  runData: dbRunData;
+  user: DeserializeAccessToken;
+
+  @IsString()
+  id: string;
+
+  @IsDate()
+  createdAt: Date;
 }
 
 export class updateRunningDatabase {
@@ -88,5 +60,5 @@ export class updateRunningDatabase {
   runDistance: number;
 
   @IsObject()
-  runData: dbRunData[];
+  runData: RunDataType[];
 }

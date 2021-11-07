@@ -1,7 +1,7 @@
 import { IsArray, IsString } from 'class-validator';
 
 interface RunData {
-  time: Date;
+  time: number;
   latitude: number;
   longitude: number;
 }
