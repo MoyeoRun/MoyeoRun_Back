@@ -124,6 +124,7 @@ export class RunningService {
 
       const analysisRunningListBetweenTerm =
         await this.runningRepository.countByCreatedAtBetweenTerm(
+          user,
           new Date(params.start),
           new Date(params.end),
         );

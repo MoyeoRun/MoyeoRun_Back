@@ -81,10 +81,12 @@ export class RunningRepository {
   }
 
   async countByCreatedAtBetweenTerm(
+    user: DeserializeAccessToken,
     start: Date,
     end: Date,
   ): Promise<analysisRunningListBetweenTerm[]> {
     return await this.runningModel.aggregate([
+      { $match: { user: user } },
       { $match: { createdAt: { $gte: start, $lte: end } } },
       {
         $group: {

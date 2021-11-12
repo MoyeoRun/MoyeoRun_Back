@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -32,4 +33,7 @@ export class SingleRunningRequest {
 
   @IsArray()
   runData: RunDataType[][] | RunDataType[];
+
+  @IsDateString()
+  createdAt: Date;
 }
