@@ -38,16 +38,29 @@ export class UpdateUserRequest {
 
 export class UserResponse {
   @IsString()
+  id: number;
+
+  @IsString()
   name: string;
 
   @IsString()
   email: string;
 
+  @IsOptional()
   @IsNumber()
-  height: number;
+  height?: number;
 
+  @IsOptional()
   @IsNumber()
-  weight: number;
+  weight?: number;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
+  @IsString()
+  nickName: string;
 }
 
 export class UserNiceNameResponse {
