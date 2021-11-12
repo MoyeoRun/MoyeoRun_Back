@@ -1,14 +1,10 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import * as _ from 'lodash';
 import { Connection } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import {
-  RunningListRequest,
-  RunningListResponse,
-  SingleRunningRequest,
-  SingleRunningResponse,
-} from '../dto/single-running.dto';
+import { RunningResponse } from '../dto/running.dto';
+import { SingleRunningRequest } from '../dto/single-running.dto';
 import { RunDataRepository } from '../repositories/run-data.repository';
 import { RunningRepository } from '../repositories/running.repository';
 import { Runnings } from '../schemas/runnings.schema';
@@ -40,15 +36,17 @@ export class SingleRunningService {
     }
     return returnArray;
   }
+
   async runStart(
     user: DeserializeAccessToken,
     body: SingleRunningRequest,
-  ): Promise<SingleRunningResponse> {
+  ): Promise<RunningResponse> {
     try {
       const sliceSingleRun = _.cloneDeep(body);
 
       if (sliceSingleRun.runData[0].constructor == Array)
         sliceSingleRun.runData = this.sliceRunData(sliceSingleRun.runData);
+      else sliceSingleRun.runData = sliceSingleRun.runData.slice(0, 49);
 
       const transactionSession = await this.connection.startSession();
       transactionSession.startTransaction();
@@ -74,76 +72,6 @@ export class SingleRunningService {
       return createSingleRun.responseData;
     } catch (err) {
       throw new HttpException(err, 500);
-    }
-  }
-
-  async getRunning(id: string): Promise<SingleRunningResponse> {
-    try {
-      const findRunning = await this.runningRepository.findById(id);
-      const findRunData = await this.runDataRepository.findByRunningsId(
-        findRunning.id,
-      );
-
-      if (!findRunning) {
-        throw new HttpException('러닝이 존재하지 않습니다', 400);
-      }
-      return {
-        ...findRunning.responseData,
-        runData: findRunData.runData,
-      };
-    } catch (err) {
-      console.error(err);
-      throw new BadRequestException(err);
-    }
-  }
-
-  async getList(
-    user: DeserializeAccessToken,
-    params: RunningListRequest,
-  ): Promise<RunningListResponse> {
-    try {
-      const findRunning = await this.runningRepository.findByUserBetweenTerm(
-        user,
-        new Date(params.start),
-        new Date(params.end),
-      );
-
-      if (!findRunning) {
-        throw new HttpException('러닝이 존재하지 않습니다', 400);
-      }
-
-      const analysisRunningListBetweenTerm =
-        await this.runningRepository.countByCreatedAtBetweenTerm(
-          new Date(params.start),
-          new Date(params.end),
-        );
-
-      let totalDistance = 0,
-        totalTime = 0,
-        totalAveragePace = 0;
-
-      analysisRunningListBetweenTerm.map((data) => {
-        totalDistance += data.totalDistanceOfTerm;
-        totalTime += data.totalTimeOfTerm;
-        totalAveragePace += data.averagePaceOfTerm;
-      });
-      totalAveragePace /= analysisRunningListBetweenTerm.length;
-
-      const runningListResponse: RunningListResponse = {
-        totalTime,
-        totalDistance,
-        totalAveragePace,
-        analysisRunningListBetweenTerm,
-        runningList: [],
-      };
-      findRunning.map((running) =>
-        runningListResponse.runningList.push(running.responseData),
-      );
-
-      return runningListResponse;
-    } catch (err) {
-      console.error(err);
-      throw new BadRequestException('BadRequest');
     }
   }
 }

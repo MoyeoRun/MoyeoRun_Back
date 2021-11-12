@@ -4,9 +4,9 @@ import { ClientSession, Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import {
   analysisRunningListBetweenTerm,
-  SingleRunningRequest,
   updateRunningDatabase,
-} from '../dto/single-running.dto';
+} from '../dto/running.dto';
+import { SingleRunningRequest } from '../dto/single-running.dto';
 import { Runnings } from '../schemas/runnings.schema';
 
 @Injectable()

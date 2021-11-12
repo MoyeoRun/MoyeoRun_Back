@@ -5,6 +5,7 @@ import { RunDataRepository } from './repositories/run-data.repository';
 import { RunningRepository } from './repositories/running.repository';
 import { RunData, RunDataSchema } from './schemas/run-data.schema';
 import { Runnings, RunningSchema } from './schemas/runnings.schema';
+import { RunningService } from './services/running.service';
 import { SingleRunningService } from './services/single-running.service';
 
 @Module({
@@ -15,6 +16,11 @@ import { SingleRunningService } from './services/single-running.service';
     ]),
   ],
   controllers: [RunningController],
-  providers: [SingleRunningService, RunningRepository, RunDataRepository],
+  providers: [
+    SingleRunningService,
+    RunningService,
+    RunningRepository,
+    RunDataRepository,
+  ],
 })
 export class RunningModule {}

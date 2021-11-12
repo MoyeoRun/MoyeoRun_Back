@@ -13,21 +13,25 @@ import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
 import {
   RunningListRequest,
   RunningListResponse,
-  SingleRunningRequest,
-  SingleRunningResponse,
-} from '../dto/single-running.dto';
+  RunningResponse,
+} from '../dto/running.dto';
+import { SingleRunningRequest } from '../dto/single-running.dto';
+import { RunningService } from '../services/running.service';
 import { SingleRunningService } from '../services/single-running.service';
 
 @Controller('running')
 export class RunningController {
-  constructor(private readonly singleRunningService: SingleRunningService) {}
+  constructor(
+    private readonly singleRunningService: SingleRunningService,
+    private readonly runningService: RunningService,
+  ) {}
 
   @UseGuards(JwtAccessAuthGuard)
   @Post('single')
   runStart(
     @User() user: DeserializeAccessToken,
     @Body() body: SingleRunningRequest,
-  ): Promise<SingleRunningResponse> {
+  ): Promise<RunningResponse> {
     return this.singleRunningService.runStart(user, body);
   }
 
@@ -37,12 +41,12 @@ export class RunningController {
     @User() user: DeserializeAccessToken,
     @Query() params: RunningListRequest,
   ): Promise<RunningListResponse> {
-    return this.singleRunningService.getList(user, params);
+    return this.runningService.getList(user, params);
   }
 
   @UseGuards(JwtAccessAuthGuard)
   @Get(':id')
-  getRunning(@Param('id') id: string): Promise<SingleRunningResponse> {
-    return this.singleRunningService.getRunning(id);
+  getRunning(@Param('id') id: string): Promise<RunningResponse> {
+    return this.runningService.getRunning(id);
   }
 }

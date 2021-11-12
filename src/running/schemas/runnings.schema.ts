@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsDate, IsEnum, IsNumber, IsObject } from 'class-validator';
 import { Document } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { SingleRunningResponse } from '../dto/single-running.dto';
+import { RunningResponse } from '../dto/running.dto';
 import { RunDataType, RunningType } from '../running.type';
 
 @Schema()
@@ -62,7 +62,7 @@ export class Runnings extends Document {
   @Prop()
   runData: RunDataType[][] | RunDataType[];
 
-  readonly responseData: SingleRunningResponse;
+  readonly responseData: RunningResponse;
 }
 
 const _RunningSchema = SchemaFactory.createForClass(Runnings);
