@@ -1,4 +1,10 @@
-import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateUserRequest {
   @IsString()
@@ -12,6 +18,14 @@ export class UpdateUserRequest {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
+  @IsString()
+  nickName?: string;
 
   @IsOptional()
   @IsNumber()
@@ -34,4 +48,12 @@ export class UserResponse {
 
   @IsNumber()
   weight: number;
+}
+
+export class UserNiceNameResponse {
+  @IsString()
+  nickName: string;
+
+  @IsBoolean()
+  isUnique: boolean;
 }

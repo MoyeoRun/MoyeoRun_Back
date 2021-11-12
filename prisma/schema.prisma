@@ -11,11 +11,13 @@ generator client {
 }
 
 model User {
-  id     Int    @id @default(autoincrement())
-  name   String
-  email  String @unique
-  height Float?
-  weight Float?
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  nickName String? @unique
+  image    String?
+  height   Float?
+  weight   Float?
 
   @@map("user")
 }

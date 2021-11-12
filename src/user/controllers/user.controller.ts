@@ -1,8 +1,12 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
-import { UpdateUserRequest, UserResponse } from '../dto/user.dto';
+import {
+  UpdateUserRequest,
+  UserNiceNameResponse,
+  UserResponse,
+} from '../dto/user.dto';
 import { UserService } from '../services/user.service';
 
 @Controller('user')
@@ -24,5 +28,14 @@ export class UserController {
     @User() user: DeserializeAccessToken,
   ): Promise<UserResponse> {
     return this.userService.findByEmail(user);
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @Get('/:nickName')
+  async checkNickName(
+    @User() user: DeserializeAccessToken,
+    @Param('nickName') nickName: string,
+  ): Promise<UserNiceNameResponse> {
+    return this.userService.findByNickName(nickName);
   }
 }
