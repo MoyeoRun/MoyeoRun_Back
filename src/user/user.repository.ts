@@ -14,6 +14,12 @@ export class UserRepository {
     return this.prisma.user.findUnique({ where: email });
   }
 
+  async findByNickName(
+    nickName: Prisma.UserWhereUniqueInput,
+  ): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: nickName });
+  }
+
   async updateByEmail(
     email: Prisma.UserWhereUniqueInput,
     userUpdateInput: Prisma.UserUpdateInput,
