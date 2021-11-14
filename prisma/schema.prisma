@@ -7,55 +7,60 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
 }
 
 model User {
-  id             Int              @id @default(autoincrement())
-  name           String
-  email          String           @unique
-  height         Float?
-  weight         Float?
-  multiRunMember MultiRunMember[]
+  id              Int               @id @default(autoincrement())
+  name            String
+  email           String            @unique
+  nickName        String?           @unique
+  image           String?
+  height          Float?
+  weight          Float?
+  MultiRoomMember MultiRoomMember[]
 
   @@map("user")
 }
 
-model MultiRun {
-  id             Int              @id @default(autoincrement())
-  roomImage      String?          @map("room_image")
-  title          String
-  state          RoomState
-  description    String?          @db.Text
-  startedAt      DateTime         @map("started_at")
-  limitTime      DateTime         @map("limit_time")
-  limitMember    Int              @map("limit_member")
-  multiRunMember MultiRunMember[]
+model MultiRoom {
+  id              Int               @id @default(autoincrement())
+  roomImage       String?           @map("room_image")
+  title           String
+  status          multiRunStatus
+  description     String?           @db.Text
+  startTime       DateTime          @map("start_time")
+  targetDistance  Int               @map("target_distance")
+  limitTime       Int               @map("limit_time")
+  limitMember     Int               @map("limit_member")
+  multiRoomMember MultiRoomMember[]
 
-  @@map("multi_run")
+  @@map("multi_room")
 }
 
-model MultiRunMember {
-  roomId Int
-  userId Int
-  runId  String?
+model MultiRoomMember {
+  roomId        Int        @map("room_id")
+  userId        Int        @map("user_id")
+  runId         String?    @map("run_id")
+  isOwner       Boolean    @default(false) @map("is_owner")
+  multiRoom     MultiRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  multiRoomUser User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  multiRunRoom MultiRun @relation(fields: [roomId], references: [id])
-  multiRunUser User     @relation(fields: [userId], references: [id])
   @@unique([roomId, userId], name: "roomMember")
-  @@map("multi_run_member")
+  @@map("multi_room_member")
 }
 
-model RunState {
+model RoomStatus {
   id       Int     @id @default(autoincrement())
-  roomId   String  @map("room_id")
-  userId   Int     @map("user_id")
+  roomId   Int     @map("room_id")
+  userId   Int     @unique @map("user_id")
   socketId String? @map("socket_id")
 
-  @@map("run_state")
+  @@map("room_status")
 }
 
-enum RoomState {
+enum multiRunStatus {
   Open
   close
 }
