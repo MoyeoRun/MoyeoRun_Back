@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class MultiRoomCreateRequest {
   @IsOptional()
@@ -12,11 +12,11 @@ export class MultiRoomCreateRequest {
   @IsString()
   description?: string;
 
-  @IsString()
-  startTime: string;
+  @IsDateString()
+  startDate: Date;
 
   @IsNumber()
-  limitTime: number;
+  targetTime: number;
 
   @IsNumber()
   limitMember: number;
@@ -24,7 +24,7 @@ export class MultiRoomCreateRequest {
   @IsNumber()
   targetDistance: number;
 }
-export class MultiRoomRequest {
+export class MultiRoomParams {
   @IsNumber()
   roomId: number;
 }

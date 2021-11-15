@@ -5,8 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import nestConfig from './config/nest.config';
 import { ImageModule } from './image/image.module';
+import { JobsModule } from './jobs/jobs.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RunningModule } from './running/running.module';
+import { SocketModule } from './socket/socket.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -25,6 +27,8 @@ import { UserModule } from './user/user.module';
     UserModule,
     RunningModule,
     ImageModule,
+    SocketModule,
+    JobsModule,
   ],
 })
 export class AppModule implements NestModule {

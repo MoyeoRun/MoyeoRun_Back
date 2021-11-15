@@ -27,6 +27,10 @@ export class RunningRepository {
     });
   }
 
+  async createForMulti(user: DeserializeAccessToken): Promise<Runnings> {
+    return await this.runningModel.create({ user, type: 'multi' });
+  }
+
   async findById(id: string): Promise<Runnings> {
     return await this.runningModel.findOne().where({ _id: id });
   }
