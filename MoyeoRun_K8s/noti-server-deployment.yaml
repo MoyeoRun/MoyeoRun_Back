@@ -3,39 +3,38 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    io.kompose.service: main-server
-  name: main-server
+    io.kompose.service: noti-server
+  name: noti-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: main-server
+      io.kompose.service: noti-server
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        io.kompose.service: main-server
+        io.kompose.service: noti-server
     spec:
       containers:
         - args:
             - ./entrypoint.prod.sh
           envFrom:
             - secretRef:
-                name: main-secrets
-          image: dnatuna/moyeorun-main-server:0.0.3
-          name: main-server
+                name: noti-secrets
+          image: dnatuna/moyeorun-noti-server:0.0.2
+          name: noti-server
           ports:
-            - containerPort: 3000
+            - containerPort: 4000
           resources:
             requests:
-              memory: '2Gi'
+              memory: '1.5Gi'
               cpu: '1000m'
             limits:
-              memory: '2Gi'
+              memory: '1.5Gi'
               cpu: '1000m'
       restartPolicy: Always
       imagePullSecrets:
         - name: regcred
-
 status: {}

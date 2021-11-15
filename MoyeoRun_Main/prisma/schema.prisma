@@ -15,6 +15,7 @@ model User {
   name     String
   email    String  @unique
   nickName String? @unique
+  token    String? @unique
   image    String?
   height   Float?
   weight   Float?

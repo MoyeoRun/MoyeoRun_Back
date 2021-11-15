@@ -75,8 +75,8 @@ services:
     environment:
       - PORT=4000
       - NODE_ENV=dev
-  kafka-monitering:
-    container_name: kafka-monitering
+  kafkamonitering:
+    container_name: kafkamonitering
     image: provectuslabs/kafka-ui:latest
     depends_on:
       - kafka

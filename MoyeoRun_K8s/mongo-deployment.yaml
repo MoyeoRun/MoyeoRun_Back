@@ -29,11 +29,11 @@ spec:
             - containerPort: 27017
           resources:
             requests:
-              memory: '1Gi'
-              cpu: '1000m'
+              memory: '3Gi'
+              cpu: '2000m'
             limits:
-              memory: '2Gi'
-              cpu: '1500m'
+              memory: '3Gi'
+              cpu: '2000m'
       restartPolicy: Always
 
 status: {}

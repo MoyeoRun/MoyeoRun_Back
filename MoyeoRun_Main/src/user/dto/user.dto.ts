@@ -34,6 +34,10 @@ export class UpdateUserRequest {
   @IsOptional()
   @IsNumber()
   weight?: number;
+
+  @IsOptional()
+  @IsString()
+  token?: string;
 }
 
 export class UserResponse {
@@ -61,6 +65,10 @@ export class UserResponse {
   @IsOptional()
   @IsString()
   nickName: string;
+
+  @IsOptional()
+  @IsString()
+  token?: string;
 }
 
 export class UserNiceNameResponse {

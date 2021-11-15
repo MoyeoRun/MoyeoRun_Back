@@ -23,7 +23,7 @@ spec:
             - --collation-server=utf8mb4_unicode_ci
           env:
             - name: MYSQL_DATABASE
-              value: moyea_run
+              value: moyeo_run
             - name: MYSQL_ROOT_PASSWORD
               value: root
           image: mysql:8
@@ -32,10 +32,10 @@ spec:
             - containerPort: 3306
           resources:
             requests:
-              memory: '1Gi'
-              cpu: '1000m'
+              memory: '3Gi'
+              cpu: '1500m'
             limits:
-              memory: '2Gi'
+              memory: '3Gi'
               cpu: '1500m'
       restartPolicy: Always
 

@@ -6,9 +6,11 @@ metadata:
     io.kompose.service: redis
   name: redis
 spec:
+  type: NodePort
   ports:
     - port: 6379
       targetPort: 6379
+      nodePort: 30004
   selector:
     io.kompose.service: redis
 status:
