@@ -8,3 +8,5 @@ dist
 db
 
 server-secret.yaml
+
+.DS_Store
