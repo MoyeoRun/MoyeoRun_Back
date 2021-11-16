@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { UserRepository } from 'src/user/user.repository';
+import { UserRepository } from 'src/repository/user.repository';
 import { OauthResponse, OauthUserRequest } from '../dto/oauth.dto';
 import { AuthService } from './auth.service';
 
@@ -77,7 +77,7 @@ export class OauthService {
   ): Promise<OauthResponse> {
     try {
       let isNewUser = false;
-      let user = await this.userRepository.findByEmail({
+      let user = await this.userRepository.findByUnique({
         email: oauthUserRequest.email,
       });
 

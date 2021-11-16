@@ -9,7 +9,7 @@ export type RunDataType = {
   latitude: number;
   longitude: number;
   currentDistance: number;
-  currentPace: number;
+  momentPace: number;
   currentTime: number;
   currentAltitude: number;
 };

@@ -5,8 +5,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import { jwtConstants } from 'src/config/passport.config';
 import { redisConstants } from 'src/config/redis.config';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { UserRepository } from 'src/repository/user.repository';
 import { UserService } from 'src/user/services/user.service';
-import { UserRepository } from 'src/user/user.repository';
 import { AuthRepository } from './auth.repository';
 import { AuthController } from './controllers/auth.controller';
 import { OauthController } from './controllers/oauth.controller';
@@ -26,7 +26,7 @@ import { OauthService } from './services/oauth.service';
       host: redisConstants.url,
       port: 6379,
     }),
-    PrismaModule.import([UserRepository]),
+    PrismaModule,
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
@@ -43,6 +43,7 @@ import { OauthService } from './services/oauth.service';
     NaverStrategy,
     GoogleStrategy,
     AuthRepository,
+    UserRepository,
   ],
   controllers: [OauthController, AuthController],
 })

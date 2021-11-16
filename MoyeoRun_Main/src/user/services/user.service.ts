@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
+import { UserRepository } from '../../repository/user.repository';
 import {
   UpdateUserRequest,
   UserNiceNameResponse,
   UserResponse,
 } from '../dto/user.dto';
-import { UserRepository } from '../user.repository';
 
 @Injectable()
 export class UserService {
@@ -22,11 +22,11 @@ export class UserService {
   }
 
   async findByEmail(user: DeserializeAccessToken): Promise<UserResponse> {
-    return this.userRepository.findByEmail({ email: user.email });
+    return this.userRepository.findByUnique({ email: user.email });
   }
 
   async findByNickName(nickName: string): Promise<UserNiceNameResponse> {
-    const user = await this.userRepository.findByNickName({ nickName });
+    const user = await this.userRepository.findByUnique({ nickName });
     if (user) {
       return {
         isUnique: false,

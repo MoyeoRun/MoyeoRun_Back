@@ -10,14 +10,10 @@ export class UserRepository {
     return this.prisma.user.create({ data });
   }
 
-  async findByEmail(email: Prisma.UserWhereUniqueInput): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: email });
-  }
-
-  async findByNickName(
-    nickName: Prisma.UserWhereUniqueInput,
+  async findByUnique(
+    uniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: nickName });
+    return this.prisma.user.findUnique({ where: uniqueInput });
   }
 
   async updateByEmail(
