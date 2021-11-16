@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: kafkamonitering
+  name: kafkamonitering
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: kafkamonitering
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: kafkamonitering
+    spec:
+      containers:
+        - env:
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: kafka:9092
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: local
+            - name: KAFKA_CLUSTERS_0_ZOOKEEPER
+              value: zookeeper:2181
+          image: provectuslabs/kafka-ui:latest
+          name: kafkamonitering
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: '500Mi'
+              cpu: '500m'
+            limits:
+              memory: '500Mi'
+              cpu: '500m'
+      restartPolicy: Always
+status: {}

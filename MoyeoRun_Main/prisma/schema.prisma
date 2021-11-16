@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
+}
+
+model User {
+  id              Int               @id @default(autoincrement())
+  name            String
+  email           String            @unique
+  nickName        String?           @unique
+  token           String?           @unique
+  image           String?
+  height          Float?
+  weight          Float?
+  MultiRoomMember MultiRoomMember[]
+
+  @@map("user")
+}
+
+model MultiRoom {
+  id              Int               @id @default(autoincrement())
+  roomImage       String?           @map("room_image")
+  title           String
+  status          multiRunStatus
+  description     String?           @db.Text
+  startDate       DateTime          @map("start_date")
+  targetDistance  Int               @map("target_distance")
+  targetTime      Int               @map("target_time")
+  limitMember     Int               @map("limit_member")
+  multiRoomMember MultiRoomMember[]
+
+  @@map("multi_room")
+}
+
+model MultiRoomMember {
+  roomId        Int        @map("room_id")
+  userId        Int        @map("user_id")
+  runId         String?    @map("run_id")
+  isOwner       Boolean    @default(false) @map("is_owner")
+  isReady       Boolean    @default(false) @map("is_ready")
+  multiRoom     MultiRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  multiRoomUser User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId], name: "roomMember")
+  @@map("multi_room_member")
+}
+
+model RoomStatus {
+  id       Int     @id @default(autoincrement())
+  roomId   Int     @map("room_id")
+  userId   Int     @unique @map("user_id")
+  socketId String? @map("socket_id")
+
+  @@map("room_status")
+}
+
+enum multiRunStatus {
+  Open
+  Close
+}
