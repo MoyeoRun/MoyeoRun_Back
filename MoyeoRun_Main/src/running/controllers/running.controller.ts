@@ -11,13 +11,14 @@ import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
 import {
+  MultiRunningRequest,
   RunningListRequest,
   RunningListResponse,
+  RunningRequest,
   RunningResponse,
 } from '../dto/running.dto';
-import { SingleRunningRequest } from '../dto/single-running.dto';
+import { SingleRunningService } from '../services/multi-running.service';
 import { RunningService } from '../services/running.service';
-import { SingleRunningService } from '../services/single-running.service';
 
 @Controller('running')
 export class RunningController {
@@ -28,9 +29,18 @@ export class RunningController {
 
   @UseGuards(JwtAccessAuthGuard)
   @Post('single')
-  runStart(
+  singleEnd(
     @User() user: DeserializeAccessToken,
-    @Body() body: SingleRunningRequest,
+    @Body() body: RunningRequest,
+  ): Promise<RunningResponse> {
+    return this.runningService.runEnd(user, body);
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @Post('multi')
+  multiEnd(
+    @User() user: DeserializeAccessToken,
+    @Body() body: MultiRunningRequest,
   ): Promise<RunningResponse> {
     return this.singleRunningService.runEnd(user, body);
   }

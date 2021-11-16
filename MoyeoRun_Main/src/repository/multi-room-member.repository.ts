@@ -52,6 +52,14 @@ export class MultiRoomMemberRepository {
     });
   }
 
+  async findReadyUserByUserId(userId: number): Promise<MultiRoomMember[]> {
+    return this.prisma.multiRoomMember.findMany({
+      where: {
+        AND: [{ userId }, { isReady: true }],
+      },
+    });
+  }
+
   async findReadyUser(roomId: number): Promise<MultiRoomMember[]> {
     return this.prisma.multiRoomMember.findMany({
       where: {
@@ -64,6 +72,24 @@ export class MultiRoomMemberRepository {
     return this.prisma.multiRoomMember.deleteMany({
       where: {
         AND: [{ roomId }, { isReady: false }],
+      },
+    });
+  }
+
+  async updateRunIdByUserIdAndRoomId(
+    runId: string,
+    roomId: number,
+    userId: number,
+  ) {
+    return this.prisma.multiRoomMember.update({
+      where: {
+        roomMember: {
+          userId,
+          roomId,
+        },
+      },
+      data: {
+        runId,
       },
     });
   }

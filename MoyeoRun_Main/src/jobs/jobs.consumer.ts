@@ -17,7 +17,7 @@ export class JobsConsumer {
   ) {}
 
   @Process('multiRunningStart')
-  async handleJob(job: Job) {
+  async multiRunningStart(job: Job) {
     const findRoom = await this.multiRoomRepository.findById(
       parseInt(job.data.roomId),
     );
@@ -38,8 +38,8 @@ export class JobsConsumer {
           roomId: job.data.roomId,
         });
 
-        this.globalCacheService.createCache(
-          `running-${job.data.roomId}`,
+        this.globalCacheService.setCache(
+          `running:${job.data.roomId}`,
           readyUser.length.toString(),
           { ttl: findRoom.targetTime / 1000 + 600 },
         );
@@ -53,5 +53,13 @@ export class JobsConsumer {
         );
       }
     }
+  }
+
+  @Process('multiRunningFinish')
+  async multiRunningFinish(job: Job) {
+    this.socketGateway.server
+      .in(job.data.roomId)
+      .emit('finish', '목표 시간이 지났습니다.');
+    await this.globalCacheService.deleteCache(`running:${job.data.roomId}`);
   }
 }

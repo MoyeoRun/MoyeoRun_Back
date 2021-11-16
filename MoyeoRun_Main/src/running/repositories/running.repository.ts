@@ -4,9 +4,9 @@ import { ClientSession, Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import {
   analysisRunningListBetweenTerm,
+  RunningRequest,
   updateRunningDatabase,
 } from '../dto/running.dto';
-import { SingleRunningRequest } from '../dto/single-running.dto';
 import { Runnings } from '../schemas/runnings.schema';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class RunningRepository {
   ) {}
 
   async create(
-    data: SingleRunningRequest,
+    data: RunningRequest,
     user: DeserializeAccessToken,
     session: ClientSession,
   ): Promise<Runnings> {

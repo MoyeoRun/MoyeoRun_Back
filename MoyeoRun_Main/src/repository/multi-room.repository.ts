@@ -39,4 +39,24 @@ export class MultiRoomRepository {
       },
     });
   }
+
+  async findOpenRoom(id: number): Promise<MultiRoom[]> {
+    return this.prisma.multiRoom.findMany({
+      where: {
+        id,
+        status: 'Open',
+      },
+    });
+  }
+
+  async findOpenRoomList(id: number | null): Promise<MultiRoom[]> {
+    return this.prisma.multiRoom.findMany({
+      where: {
+        status: 'Open',
+        NOT: {
+          id,
+        },
+      },
+    });
+  }
 }

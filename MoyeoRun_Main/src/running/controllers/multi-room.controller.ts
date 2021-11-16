@@ -54,6 +54,12 @@ export class MultiRoomController {
     return this.multiRoomService.deleteMultiRoom(user, roomId);
   }
 
+  @Get('/list')
+  @UseGuards(JwtAccessAuthGuard)
+  async getListMultiRoom(@User() user: DeserializeAccessToken) {
+    return this.multiRoomService.findMultiRoomList(user);
+  }
+
   @Get('/:roomId')
   @UseGuards(JwtAccessAuthGuard)
   async getOneMultiRoom(

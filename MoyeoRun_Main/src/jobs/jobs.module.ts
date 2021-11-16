@@ -1,5 +1,5 @@
 import { BullModule } from '@nestjs/bull';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { GlobalCacheModule } from 'src/cache/global.cache.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
@@ -21,7 +21,7 @@ import { JobsService } from './jobs.service';
     BullModule.registerQueue({
       name: 'multiRun',
     }),
-    SocketModule,
+    forwardRef(() => SocketModule),
     PrismaModule,
     GlobalCacheModule,
   ],

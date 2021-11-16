@@ -2,27 +2,45 @@ import {
   IsArray,
   IsDate,
   IsDateString,
+  IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
-import { RunDataType } from '../running.type';
-import { SingleRunningRequest } from './single-running.dto';
-
-interface RunData {
-  time: number;
-  latitude: number;
-  longitude: number;
-}
+import { RunDataType, RunningType } from '../running.type';
 
 export class RunningRequest {
-  @IsString()
-  id: string;
+  @IsEnum(RunningType)
+  type: RunningType;
+
+  @ValidateIf((o) => o.type === RunningType.time)
+  @IsNotEmpty()
+  @IsNumber()
+  targetTime?: number;
+
+  @ValidateIf((o) => o.type === RunningType.distance)
+  @IsNotEmpty()
+  @IsNumber()
+  targetDistance?: number;
+
+  @IsNumber()
+  runPace: number;
+
+  @IsNumber()
+  runTime: number;
+
+  @IsNumber()
+  runDistance: number;
 
   @IsArray()
-  runData: Array<RunData>;
+  runData: RunDataType[][] | RunDataType[];
+
+  @IsDateString()
+  createdAt: Date;
 }
 
 export class RunningListRequest {
@@ -98,7 +116,7 @@ export class RunSummary {
   longitudeOfSection: number;
 }
 
-export class RunningResponse extends SingleRunningRequest {
+export class RunningResponse extends RunningRequest {
   @IsObject()
   user: DeserializeAccessToken;
 
@@ -111,4 +129,9 @@ export class RunningResponse extends SingleRunningRequest {
 
   @IsDate()
   createdAt: Date;
+}
+
+export class MultiRunningRequest extends RunningRequest {
+  @IsNumber()
+  roomId: number;
 }
