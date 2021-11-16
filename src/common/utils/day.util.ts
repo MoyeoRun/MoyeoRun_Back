@@ -9,3 +9,5 @@ export const subTime = (now: Date, past: Date) =>
 
 export const subTimeByMillisecond = (now: Date) =>
   dayjs(now).diff(dayjs(), 'milliseconds');
+
+export const addSeconds = (seconds: number) => dayjs().add(seconds, 'seconds');

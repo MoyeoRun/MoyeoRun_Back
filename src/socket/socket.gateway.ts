@@ -1,3 +1,4 @@
+import { User } from '.prisma/client';
 import { HttpException, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
@@ -10,30 +11,91 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { GlobalCacheService } from 'src/cache/global.cache.service';
+import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
+import { MultiRoomRepository } from 'src/repository/multi-room.repository';
 import { RoomStatusRepository } from 'src/repository/room-status.repository';
 
 @WebSocketGateway({ cors: true, transports: ['websocket'] })
 export class SocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly roomStatusRepository: RoomStatusRepository) {}
+  constructor(
+    private readonly roomStatusRepository: RoomStatusRepository,
+    private readonly multiRoomRepository: MultiRoomRepository,
+    private readonly multiRoomMemberRepository: MultiRoomMemberRepository,
+    private readonly globalCacheService: GlobalCacheService,
+  ) {}
   @WebSocketServer() public server: Server;
   public socketId: string;
   private logger = new Logger('running');
-  public roomStatus: any;
+  public roomStatus: any = {};
   afterInit() {
     this.logger.log('SOCKET!! running init');
   }
 
-  @SubscribeMessage('send')
-  test(
-    @MessageBody() data: { message: string; id: string },
+  @SubscribeMessage('ready')
+  async handleReady(
+    @MessageBody() data: { roomId: number; user: User },
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log('send', `룸연결${data.id}`);
-    console.log(data.id);
-    this.server.in(data.id).emit('message', { message: data.message });
-    // socket.in(data.id).emit('message', { message: data.message });
+    try {
+      //방이 없는 경우 생성
+      if (!this.roomStatus[`${data.roomId}`]) {
+        const findRoom = await this.multiRoomRepository.findById(data.roomId);
+        console.log(findRoom);
+        this.roomStatus[`${data.roomId}`] = {};
+        this.roomStatus[`${data.roomId}`]['connectedUserId'] = [];
+        this.roomStatus[`${data.roomId}`]['multiRoomMember'] =
+          findRoom.multiRoomMember.length;
+        this.roomStatus[`${data.roomId}`]['targetTime'] = findRoom.targetTime;
+      }
+
+      //이미 신청한 경우 false;
+      if (
+        this.roomStatus[`${data.roomId}`]['connectedUserId'].includes(
+          data.user.id,
+        )
+      ) {
+        return false;
+      }
+
+      const multiMember = await this.multiRoomMemberRepository.updateReady(
+        data.roomId,
+        data.user.id,
+      );
+      this.roomStatus[`${data.roomId}`]['connectedUserId'].push(
+        multiMember.userId,
+      );
+
+      this.server.in(data.roomId.toString()).emit('roomStatus', {
+        connectedUserId: this.roomStatus[`${data.roomId}`]['connectedUserId'],
+      });
+      console.log(this.roomStatus[`${data.roomId}`]);
+
+      //모두 다 참여한 경우
+      if (
+        this.roomStatus[`${data.roomId}`][`multiRoomMember`] ==
+        this.roomStatus[`${data.roomId}`]['connectedUserId'].length
+      ) {
+        await this.multiRoomRepository.updateClose(data.roomId);
+        this.server.in(data.roomId.toString()).emit('start', {
+          message: '러닝시작.',
+          roomId: data.roomId,
+        });
+
+        this.globalCacheService.createCache(
+          `running-${data.roomId}`,
+          this.roomStatus[`${data.roomId}`][
+            'connectedUserId'
+          ].length.toString(),
+          { ttl: this.roomStatus[`${data.roomId}`]['targetTime'] / 1000 + 600 },
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      socket.emit('readyError', err);
+    }
   }
 
   @SubscribeMessage('join')

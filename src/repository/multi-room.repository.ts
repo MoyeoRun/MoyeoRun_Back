@@ -30,4 +30,13 @@ export class MultiRoomRepository {
       where: { id },
     });
   }
+
+  async updateClose(id: number): Promise<MultiRoom> {
+    return this.prisma.multiRoom.update({
+      where: { id },
+      data: {
+        status: 'Close',
+      },
+    });
+  }
 }

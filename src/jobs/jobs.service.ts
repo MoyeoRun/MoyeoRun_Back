@@ -9,8 +9,7 @@ export class JobsService {
 
   async addJobMultiRunBroadCast(roomId: number, startTime: Date) {
     console.log('multiRun 생성');
-    const delayTime = subTimeByMillisecond(new Date(startTime)) + 300000;
-    console.log(delayTime);
+    const delayTime = subTimeByMillisecond(new Date(startTime)) + 30000;
     const job = await this.multiRunQueue.add(
       'multiRunningStart',
       { roomId },
