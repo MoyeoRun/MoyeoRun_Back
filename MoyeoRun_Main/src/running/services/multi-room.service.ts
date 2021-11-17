@@ -174,7 +174,7 @@ export class MultiRoomService {
       currentRoom = await this.multiRoomRepository.findOpenRoom(
         currentParticipatedRoom[0].roomId,
       );
-      openRoomList = await this.multiRoomRepository.findOpenRoomList(
+      openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
         currentRoom[0].id,
       );
     }

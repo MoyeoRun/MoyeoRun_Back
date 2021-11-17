@@ -7,6 +7,7 @@ import {
   RunningRequest,
   updateRunningDatabase,
 } from '../dto/running.dto';
+import { RunningType } from '../running.type';
 import { Runnings } from '../schemas/runnings.schema';
 
 @Injectable()
@@ -35,6 +36,10 @@ export class RunningRepository {
     return await this.runningModel.findOne().where({ _id: id });
   }
 
+  async findManyInMultiRoomUser(ids: string[]): Promise<Runnings[]> {
+    return await this.runningModel.find().where({ _id: ids });
+  }
+
   async findByUserBetweenTerm(
     user: DeserializeAccessToken,
     start: Date,
@@ -42,6 +47,9 @@ export class RunningRepository {
   ): Promise<Runnings[]> {
     return await this.runningModel.find({
       user: user,
+      type: {
+        $ne: RunningType['multi'],
+      },
       createdAt: {
         $gte: start,
         $lte: end,

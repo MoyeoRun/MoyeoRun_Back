@@ -3,6 +3,9 @@ import { InjectConnection } from '@nestjs/mongoose';
 import * as _ from 'lodash';
 import { Connection } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
+import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
+import { MultiRoomRepository } from 'src/repository/multi-room.repository';
+import { MultiListElement } from '../dto/multi-room.dto';
 import {
   RunningListRequest,
   RunningListResponse,
@@ -19,6 +22,8 @@ export class RunningService {
   constructor(
     private readonly runningRepository: RunningRepository,
     private readonly runDataRepository: RunDataRepository,
+    private readonly multiRoomMemberRepository: MultiRoomMemberRepository,
+    private readonly multiRoomRepository: MultiRoomRepository,
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
@@ -130,7 +135,7 @@ export class RunningService {
     }
   }
 
-  async getList(
+  async getSingleRunList(
     user: DeserializeAccessToken,
     params: RunningListRequest,
   ): Promise<RunningListResponse> {
@@ -179,6 +184,46 @@ export class RunningService {
       console.error(err);
       throw new BadRequestException('BadRequest');
     }
+  }
+
+  async getMultiRunList(
+    user: DeserializeAccessToken,
+    params: RunningListRequest,
+  ): Promise<MultiListElement[]> {
+    const multiList =
+      await this.multiRoomMemberRepository.findByUserIdWithMultiRoomBetweenTerm(
+        user.id,
+        new Date(params.start),
+        new Date(params.end),
+      );
+    const multiListResponse: MultiListElement[] = [];
+
+    multiList.map((multiRoom) => {
+      const rank = multiRoom.multiRoom.multiRoomMember[0].rank;
+      delete multiRoom.multiRoom.multiRoomMember;
+      multiListResponse.push({
+        multiRoom: multiRoom.multiRoom,
+        rank,
+      });
+    });
+
+    return multiListResponse;
+  }
+
+  async getMultiRun(user: DeserializeAccessToken, id: number) {
+    const multiRoomWithMember =
+      await this.multiRoomRepository.findByUserIdWithMultiRoomMember(
+        Number(id),
+      );
+    const myMultiRoomInfo = multiRoomWithMember.multiRoomMember.filter(
+      (data) => data.userId === user.id,
+    );
+
+    const myRunData = await this.getRunning(myMultiRoomInfo[0].runId);
+    return {
+      multiRoomWithMember,
+      myRunData,
+    };
   }
 
   async runEnd(

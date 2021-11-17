@@ -21,7 +21,7 @@ export class JobsConsumer {
     const findRoom = await this.multiRoomRepository.findById(
       parseInt(job.data.roomId),
     );
-    if (findRoom.status == 'Close') {
+    if (findRoom.status != 'Open') {
       return false;
     } else {
       const readyUser = await this.multiRoomMemberRepository.findReadyUser(
@@ -29,7 +29,7 @@ export class JobsConsumer {
       );
       if (readyUser.length > 0) {
         // 레디 유저가 있는 경우 시작
-        await this.multiRoomRepository.updateClose(parseInt(job.data.roomId));
+        await this.multiRoomRepository.updateRunning(parseInt(job.data.roomId));
         await this.multiRoomMemberRepository.deleteNotReadyUser(
           parseInt(job.data.roomId),
         );
@@ -61,5 +61,7 @@ export class JobsConsumer {
       .in(job.data.roomId)
       .emit('finish', '목표 시간이 지났습니다.');
     await this.globalCacheService.deleteCache(`running:${job.data.roomId}`);
+    await this.roomStatusRepository.deleteByRoomId(parseInt(job.data.roomId));
+    await this.multiRoomRepository.updateClose(parseInt(job.data.roomId));
   }
 }

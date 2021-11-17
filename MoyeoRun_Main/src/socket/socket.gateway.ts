@@ -71,7 +71,7 @@ export class SocketGateway
 
       //모두 다 참여한 경우
       if (findRoom.multiRoomMember.length == readyUsers.length) {
-        await this.multiRoomRepository.updateClose(data.roomId);
+        await this.multiRoomRepository.updateRunning(data.roomId);
         this.server.in(data.roomId.toString()).emit('start', {
           message: '러닝시작.',
           roomId: data.roomId,

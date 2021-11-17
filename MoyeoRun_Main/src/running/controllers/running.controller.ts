@@ -10,6 +10,7 @@ import {
 import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
+import { MultiListElement } from '../dto/multi-room.dto';
 import {
   MultiRunningRequest,
   RunningListRequest,
@@ -17,13 +18,13 @@ import {
   RunningRequest,
   RunningResponse,
 } from '../dto/running.dto';
-import { SingleRunningService } from '../services/multi-running.service';
+import { MultiRunningService } from '../services/multi-running.service';
 import { RunningService } from '../services/running.service';
 
 @Controller('running')
 export class RunningController {
   constructor(
-    private readonly singleRunningService: SingleRunningService,
+    private readonly multiRunningService: MultiRunningService,
     private readonly runningService: RunningService,
   ) {}
 
@@ -42,21 +43,39 @@ export class RunningController {
     @User() user: DeserializeAccessToken,
     @Body() body: MultiRunningRequest,
   ): Promise<RunningResponse> {
-    return this.singleRunningService.runEnd(user, body);
+    return this.multiRunningService.runEnd(user, body);
   }
 
   @UseGuards(JwtAccessAuthGuard)
-  @Get('list')
-  getList(
+  @Get('list/single')
+  getSingleRunList(
     @User() user: DeserializeAccessToken,
     @Query() params: RunningListRequest,
   ): Promise<RunningListResponse> {
-    return this.runningService.getList(user, params);
+    return this.runningService.getSingleRunList(user, params);
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @Get('list/multi')
+  getMultiRunList(
+    @User() user: DeserializeAccessToken,
+    @Query() params: RunningListRequest,
+  ): Promise<MultiListElement[]> {
+    return this.runningService.getMultiRunList(user, params);
   }
 
   @UseGuards(JwtAccessAuthGuard)
   @Get(':id')
-  getRunning(@Param('id') id: string): Promise<RunningResponse> {
+  getSingleRunning(@Param('id') id: string): Promise<RunningResponse> {
     return this.runningService.getRunning(id);
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @Get('multi/:id')
+  getMultiRunning(
+    @User() user: DeserializeAccessToken,
+    @Param('id') id: number,
+  ): Promise<any> {
+    return this.runningService.getMultiRun(user, id);
   }
 }
