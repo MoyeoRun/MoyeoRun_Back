@@ -74,7 +74,7 @@ export class MultiRoomService {
     return multiRoom;
   }
 
-  async join(user: DeserializeAccessToken, roomId: string): Promise<string> {
+  async join(user: DeserializeAccessToken, roomId: string): Promise<any> {
     const participatedRoom = await this.roomStatusRepository.findByUserId(
       user.id,
     );
@@ -107,13 +107,15 @@ export class MultiRoomService {
       userId: user.id,
       socketId: this.socketGateway.socketId,
     });
-    return '방 참여 성공';
+    return { success: true };
   }
 
-  async leave(user: DeserializeAccessToken, roomId: string): Promise<string> {
-    const participatedRoom = await this.multiRoomMemberRepository.findByUserId(
-      user.id,
-    );
+  async leave(user: DeserializeAccessToken, roomId: string): Promise<any> {
+    const participatedRoom =
+      await this.multiRoomMemberRepository.findByUserIdAndRoomId(
+        Number(roomId),
+        user.id,
+      );
 
     if (!participatedRoom[0]) {
       throw new HttpException('방에 참여하고 있지 않습니다.', 400);
@@ -124,16 +126,19 @@ export class MultiRoomService {
 
     if (!findMultiRun) throw new HttpException('존재하지 않는 방입니다', 400);
 
-    const checkOwner = await this.multiRoomMemberRepository.findOwner(user.id);
+    const checkOwner = await this.multiRoomMemberRepository.findOwner(
+      Number(roomId),
+      user.id,
+    );
     if (checkOwner[0])
-      throw new HttpException('본인이 소유한 방은 떠나기 불가능합니다', 403);
+      throw new HttpException('본인이 소유한 방은 떠나기 불가능합니다', 400);
 
     await this.multiRoomMemberRepository.delete(findMultiRun.id, user.id);
     await this.roomStatusRepository.deleteByUserId(user.id);
     this.socketGateway.server
       .in(this.socketGateway.socketId)
       .socketsLeave(findMultiRun.id.toString());
-    return '방 떠나기 성공';
+    return { success: true };
   }
 
   async deleteMultiRoom(user: DeserializeAccessToken, roomId: string) {
@@ -143,16 +148,19 @@ export class MultiRoomService {
 
     if (!findMultiRun) throw new HttpException('존재하지 않는 방입니다', 400);
 
-    const isOwner = await this.multiRoomMemberRepository.findOwner(user.id);
+    const isOwner = await this.multiRoomMemberRepository.findOwner(
+      Number(roomId),
+      user.id,
+    );
     if (!isOwner[0])
-      throw new HttpException('방을 삭제할 권한이 없습니다', 403);
+      throw new HttpException('방을 삭제할 권한이 없습니다', 400);
 
     await this.multiRoomRepository.delete(findMultiRun.id);
     const getJob = await this.globalCacheService.getCache(`roomJob:${roomId}`);
     if (getJob) await this.globalCacheService.deleteCache(getJob);
     await this.globalCacheService.deleteCache(`roomJob:${roomId}`);
     await this.roomStatusRepository.deleteByRoomId(findMultiRun.id);
-    return '방 삭제 성공';
+    return { success: true };
   }
 
   async findMultiRoom(

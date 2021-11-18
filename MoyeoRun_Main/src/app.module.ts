@@ -5,7 +5,6 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import nestConfig from './config/nest.config';
 import { ImageModule } from './image/image.module';
-import { KafkaModule } from './kafka/kafka.module';
 import { NotificationModule } from './notification/notification.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RunningModule } from './running/running.module';
@@ -27,7 +26,6 @@ import { UserModule } from './user/user.module';
     UserModule,
     RunningModule,
     ImageModule,
-    KafkaModule,
     NotificationModule,
   ],
 })

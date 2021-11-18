@@ -1,6 +1,6 @@
 import { IsObject, IsString } from 'class-validator';
 
-export class TestNotificationRequest {
+export class NotificationServerRequest {
   @IsString()
   title: string;
 
