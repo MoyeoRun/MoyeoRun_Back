@@ -1,16 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { kafkaServerId } from 'src/common/utils/kafka.util';
-import { NotificationRequest } from './kafka.dto';
+import { NotificationServerRequest } from './notification.dto';
 
 @Injectable()
-export class KafkaService {
+export class NotificationService {
   constructor(@Inject(kafkaServerId) private readonly client: ClientKafka) {}
 
-  sendNotification(notificationRequest: NotificationRequest) {
+  sendNotification(notificationRequest: NotificationServerRequest) {
     return this.client.emit('notification', {
-      notification: notificationRequest.notification,
-      data: notificationRequest.body,
+      notification: {
+        title: notificationRequest.title,
+        body: notificationRequest.body,
+      },
+      data: notificationRequest.data,
       token: notificationRequest.token,
     });
   }

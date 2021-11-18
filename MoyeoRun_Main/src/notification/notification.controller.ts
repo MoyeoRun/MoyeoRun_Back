@@ -1,19 +1,17 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { KafkaService } from 'src/kafka/kafka.service';
-import { TestNotificationRequest } from './notification.dto';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationServerRequest } from './notification.dto';
 
 @Controller('noti')
 export class NotificationController {
-  constructor(private noti: KafkaService) {}
+  constructor(private noti: NotificationService) {}
 
   @Post()
-  sendNotification(@Body() body: TestNotificationRequest) {
+  sendNotification(@Body() body: NotificationServerRequest) {
     this.noti.sendNotification({
-      notification: {
-        title: body.title,
-        body: body.body,
-      },
-      body: body.data,
+      title: body.title,
+      body: body.body,
+      data: body.data,
       token: body.token,
     });
   }

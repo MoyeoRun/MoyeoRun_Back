@@ -36,17 +36,23 @@ export class MultiRoomMemberRepository {
     });
   }
 
-  async findOwner(userId: number): Promise<MultiRoomMember[]> {
+  async findOwner(roomId: number, userId: number): Promise<MultiRoomMember[]> {
     return this.prisma.multiRoomMember.findMany({
       where: {
-        AND: [{ userId }, { isOwner: true }],
+        userId,
+        isOwner: true,
+        roomId,
       },
     });
   }
 
-  async findByUserId(userId: number): Promise<MultiRoomMember[]> {
+  async findByUserIdAndRoomId(
+    roomId: number,
+    userId: number,
+  ): Promise<MultiRoomMember[]> {
     return this.prisma.multiRoomMember.findMany({
       where: {
+        roomId,
         userId,
       },
     });

@@ -4,8 +4,10 @@ import { GlobalCacheModule } from 'src/cache/global.cache.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
 import { RoomStatusRepository } from 'src/repository/room-status.repository';
+import { UserRepository } from 'src/repository/user.repository';
 import { SocketModule } from 'src/socket/socket.module';
 import { redisConstants } from './../config/redis.config';
+import { NotificationModule } from './../notification/notification.module';
 import { MultiRoomRepository } from './../repository/multi-room.repository';
 import { JobsConsumer } from './jobs.consumer';
 import { JobsService } from './jobs.service';
@@ -24,6 +26,7 @@ import { JobsService } from './jobs.service';
     forwardRef(() => SocketModule),
     PrismaModule,
     GlobalCacheModule,
+    NotificationModule,
   ],
   providers: [
     JobsConsumer,
@@ -31,6 +34,7 @@ import { JobsService } from './jobs.service';
     MultiRoomRepository,
     MultiRoomMemberRepository,
     RoomStatusRepository,
+    UserRepository,
   ],
   exports: [JobsService],
 })

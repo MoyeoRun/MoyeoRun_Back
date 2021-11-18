@@ -5,6 +5,7 @@ import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { GlobalCacheService } from 'src/cache/global.cache.service';
 import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
 import { MultiRoomRepository } from 'src/repository/multi-room.repository';
+import { RoomStatusRepository } from 'src/repository/room-status.repository';
 import { SocketGateway } from 'src/socket/socket.gateway';
 import { MultiRunningRequest, RunningResponse } from '../dto/running.dto';
 import { RunDataRepository } from '../repositories/run-data.repository';
@@ -18,6 +19,7 @@ export class MultiRunningService {
     private readonly runningService: RunningService,
     private readonly multiRoomRepository: MultiRoomRepository,
     private readonly multiRoomMemberRepository: MultiRoomMemberRepository,
+    private readonly roomStatusRepository: RoomStatusRepository,
     private readonly globalCacheService: GlobalCacheService,
     private readonly socketGateway: SocketGateway,
     @InjectConnection() private readonly connection: Connection,
@@ -110,6 +112,7 @@ export class MultiRunningService {
       const roomId = body.roomId;
       delete body.roomId;
       const runningResponse = await this.runningService.runEnd(user, body);
+      await this.roomStatusRepository.deleteByUserId(user.id);
       const testLogging =
         await this.multiRoomMemberRepository.updateRunIdByUserIdAndRoomId(
           runningResponse.id,

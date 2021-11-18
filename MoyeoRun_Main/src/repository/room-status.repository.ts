@@ -57,4 +57,12 @@ export class RoomStatusRepository {
       },
     });
   }
+
+  async findOnlineUserByRoomId(roomId: number) {
+    return this.prisma.roomStatus.findMany({
+      where: {
+        AND: [{ roomId }, { socketId: null }],
+      },
+    });
+  }
 }

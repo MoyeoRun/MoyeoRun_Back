@@ -111,6 +111,7 @@ export class SocketGateway
       const participatedRoom = await this.roomStatusRepository.findByUserId(
         parseInt(data.userId),
       );
+      let findRoom;
       if (participatedRoom.length > 0) {
         console.log('룸 존재');
         await this.roomStatusRepository.updateSocketIdByUserId(
@@ -118,6 +119,9 @@ export class SocketGateway
           socket.id,
         );
         socket.join(participatedRoom[0].roomId.toString());
+        findRoom = await this.multiRoomRepository.findById(
+          participatedRoom[0].roomId,
+        );
         //룸 정보 전송
       }
       const participatedRoomId = participatedRoom[0]
@@ -126,6 +130,7 @@ export class SocketGateway
 
       socket.emit('welcome', {
         roomId: participatedRoomId,
+        status: findRoom ? findRoom.status : null,
       });
       this.logger.log('연결성공');
     } catch (err) {

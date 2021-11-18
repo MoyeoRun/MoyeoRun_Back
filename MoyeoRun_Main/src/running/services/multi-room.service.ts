@@ -34,47 +34,63 @@ export class MultiRoomService {
     if (participatedRoom.length > 0) {
       throw new HttpException('이미 방에 참여중입니다', 400);
     }
-    const multiRoom = await this.multiRoomRepository.create({
-      ...body,
-      status: 'Open',
-      multiRoomMember: {
-        create: {
-          userId: user.id,
-          isOwner: true,
+    let multiRoom;
+    try {
+      multiRoom = await this.multiRoomRepository.create({
+        ...body,
+        status: 'Open',
+        multiRoomMember: {
+          create: {
+            userId: user.id,
+            isOwner: true,
+          },
         },
-      },
-    });
-
-    //소켓 연결
-    this.socketGateway.server
-      .in(this.socketGateway.socketId)
-      .socketsJoin(multiRoom.id.toString());
-
-    console.log(this.socketGateway.socketId);
-    await this.roomStatusRepository.create({
-      roomId: multiRoom.id,
-      userId: user.id,
-      socketId: this.socketGateway.socketId,
-    });
+      });
+      await this.roomStatusRepository.create({
+        roomId: multiRoom.id,
+        userId: user.id,
+        socketId: this.socketGateway.socketId,
+      });
+      //소켓 연결
+      this.socketGateway.server
+        .in(this.socketGateway.socketId)
+        .socketsJoin(multiRoom.id.toString());
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('방 생성 실패', 500);
+    }
 
     // Job 등록
-    const result = await this.jobsService.addJobMultiRunBroadCast(
+    const autoStartJob = await this.jobsService.addJobMultiRunBroadCastStart(
       multiRoom.id,
       body.startDate,
     );
-    const delay = subTime(new Date(multiRoom.startDate), new Date()) + 50;
+    const autoStartJobCacheTtl =
+      subTime(new Date(multiRoom.startDate), new Date()) + 50;
     await this.globalCacheService.setCache(
       `roomJob:${multiRoom.id}`,
-      `bull:multiRun:${result.id}`,
+      `bull:multiRun:${autoStartJob.id}`,
       {
-        ttl: delay,
+        ttl: autoStartJobCacheTtl,
       },
     );
-
+    const prepareJob = await this.jobsService.prepareMultiRunBroadCast(
+      multiRoom.id,
+      body.startDate,
+    );
+    const prepareJobCacheTtl =
+      subTime(new Date(multiRoom.startDate), new Date()) + 50;
+    await this.globalCacheService.setCache(
+      `roomNotiJob:${multiRoom.id}`,
+      `bull:multiRun:${prepareJob.id}`,
+      {
+        ttl: prepareJobCacheTtl,
+      },
+    );
     return multiRoom;
   }
 
-  async join(user: DeserializeAccessToken, roomId: string): Promise<string> {
+  async join(user: DeserializeAccessToken, roomId: string): Promise<any> {
     const participatedRoom = await this.roomStatusRepository.findByUserId(
       user.id,
     );
@@ -93,27 +109,35 @@ export class MultiRoomService {
     if (subTimeByMillisecond(new Date(findMultiRun.startDate)) < 10000) {
       throw new HttpException('참여하실 수 없습니다', 400);
     }
-    await this.multiRoomMemberRepository.create({
-      roomId: findMultiRun.id,
-      userId: user.id,
-    });
-    //소켓 연결
-    this.socketGateway.server
-      .in(this.socketGateway.socketId)
-      .socketsJoin(findMultiRun.id.toString());
+    try {
+      await this.multiRoomMemberRepository.create({
+        roomId: findMultiRun.id,
+        userId: user.id,
+      });
 
-    await this.roomStatusRepository.create({
-      roomId: findMultiRun.id,
-      userId: user.id,
-      socketId: this.socketGateway.socketId,
-    });
-    return '방 참여 성공';
+      await this.roomStatusRepository.create({
+        roomId: findMultiRun.id,
+        userId: user.id,
+        socketId: this.socketGateway.socketId,
+      });
+      //소켓 연결
+      this.socketGateway.server
+        .in(this.socketGateway.socketId)
+        .socketsJoin(findMultiRun.id.toString());
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('참가 실패', 400);
+    }
+
+    return { success: true };
   }
 
-  async leave(user: DeserializeAccessToken, roomId: string): Promise<string> {
-    const participatedRoom = await this.multiRoomMemberRepository.findByUserId(
-      user.id,
-    );
+  async leave(user: DeserializeAccessToken, roomId: string): Promise<any> {
+    const participatedRoom =
+      await this.multiRoomMemberRepository.findByUserIdAndRoomId(
+        Number(roomId),
+        user.id,
+      );
 
     if (!participatedRoom[0]) {
       throw new HttpException('방에 참여하고 있지 않습니다.', 400);
@@ -124,16 +148,25 @@ export class MultiRoomService {
 
     if (!findMultiRun) throw new HttpException('존재하지 않는 방입니다', 400);
 
-    const checkOwner = await this.multiRoomMemberRepository.findOwner(user.id);
+    const checkOwner = await this.multiRoomMemberRepository.findOwner(
+      Number(roomId),
+      user.id,
+    );
     if (checkOwner[0])
-      throw new HttpException('본인이 소유한 방은 떠나기 불가능합니다', 403);
+      throw new HttpException('본인이 소유한 방은 떠나기 불가능합니다', 400);
 
-    await this.multiRoomMemberRepository.delete(findMultiRun.id, user.id);
-    await this.roomStatusRepository.deleteByUserId(user.id);
-    this.socketGateway.server
-      .in(this.socketGateway.socketId)
-      .socketsLeave(findMultiRun.id.toString());
-    return '방 떠나기 성공';
+    try {
+      await this.multiRoomMemberRepository.delete(findMultiRun.id, user.id);
+      await this.roomStatusRepository.deleteByUserId(user.id);
+      this.socketGateway.server
+        .in(this.socketGateway.socketId)
+        .socketsLeave(findMultiRun.id.toString());
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('방 떠나기 실패', 400);
+    }
+
+    return { success: true };
   }
 
   async deleteMultiRoom(user: DeserializeAccessToken, roomId: string) {
@@ -143,16 +176,31 @@ export class MultiRoomService {
 
     if (!findMultiRun) throw new HttpException('존재하지 않는 방입니다', 400);
 
-    const isOwner = await this.multiRoomMemberRepository.findOwner(user.id);
+    const isOwner = await this.multiRoomMemberRepository.findOwner(
+      Number(roomId),
+      user.id,
+    );
     if (!isOwner[0])
-      throw new HttpException('방을 삭제할 권한이 없습니다', 403);
+      throw new HttpException('방을 삭제할 권한이 없습니다', 400);
+    try {
+      await this.multiRoomRepository.delete(findMultiRun.id);
+      await this.roomStatusRepository.deleteByRoomId(findMultiRun.id);
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('방 삭제 실패', 400);
+    }
 
-    await this.multiRoomRepository.delete(findMultiRun.id);
     const getJob = await this.globalCacheService.getCache(`roomJob:${roomId}`);
     if (getJob) await this.globalCacheService.deleteCache(getJob);
     await this.globalCacheService.deleteCache(`roomJob:${roomId}`);
-    await this.roomStatusRepository.deleteByRoomId(findMultiRun.id);
-    return '방 삭제 성공';
+
+    const getPrepareJob = await this.globalCacheService.getCache(
+      `roomNotiJob:${roomId}`,
+    );
+    if (getPrepareJob) await this.globalCacheService.deleteCache(getPrepareJob);
+    await this.globalCacheService.deleteCache(`roomNotiJob:${roomId}`);
+
+    return { success: true };
   }
 
   async findMultiRoom(
@@ -172,9 +220,11 @@ export class MultiRoomService {
     let currentRoom = [],
       openRoomList = [];
     if (currentParticipatedRoom.length > 0) {
+      console.log(currentParticipatedRoom);
       currentRoom = await this.multiRoomRepository.findOpenRoom(
         currentParticipatedRoom[0].roomId,
       );
+      console.log(currentRoom);
       openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
         currentRoom[0].id,
       );
