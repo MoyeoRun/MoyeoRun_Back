@@ -34,28 +34,31 @@ export class MultiRoomService {
     if (participatedRoom.length > 0) {
       throw new HttpException('이미 방에 참여중입니다', 400);
     }
-    const multiRoom = await this.multiRoomRepository.create({
-      ...body,
-      status: 'Open',
-      multiRoomMember: {
-        create: {
-          userId: user.id,
-          isOwner: true,
+    let multiRoom;
+    try {
+      multiRoom = await this.multiRoomRepository.create({
+        ...body,
+        status: 'Open',
+        multiRoomMember: {
+          create: {
+            userId: user.id,
+            isOwner: true,
+          },
         },
-      },
-    });
-
-    //소켓 연결
-    this.socketGateway.server
-      .in(this.socketGateway.socketId)
-      .socketsJoin(multiRoom.id.toString());
-
-    console.log(this.socketGateway.socketId);
-    await this.roomStatusRepository.create({
-      roomId: multiRoom.id,
-      userId: user.id,
-      socketId: this.socketGateway.socketId,
-    });
+      });
+      await this.roomStatusRepository.create({
+        roomId: multiRoom.id,
+        userId: user.id,
+        socketId: this.socketGateway.socketId,
+      });
+      //소켓 연결
+      this.socketGateway.server
+        .in(this.socketGateway.socketId)
+        .socketsJoin(multiRoom.id.toString());
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('방 생성 실패', 500);
+    }
 
     // Job 등록
     const result = await this.jobsService.addJobMultiRunBroadCast(
@@ -93,20 +96,26 @@ export class MultiRoomService {
     if (subTimeByMillisecond(new Date(findMultiRun.startDate)) < 10000) {
       throw new HttpException('참여하실 수 없습니다', 400);
     }
-    await this.multiRoomMemberRepository.create({
-      roomId: findMultiRun.id,
-      userId: user.id,
-    });
-    //소켓 연결
-    this.socketGateway.server
-      .in(this.socketGateway.socketId)
-      .socketsJoin(findMultiRun.id.toString());
+    try {
+      await this.multiRoomMemberRepository.create({
+        roomId: findMultiRun.id,
+        userId: user.id,
+      });
 
-    await this.roomStatusRepository.create({
-      roomId: findMultiRun.id,
-      userId: user.id,
-      socketId: this.socketGateway.socketId,
-    });
+      await this.roomStatusRepository.create({
+        roomId: findMultiRun.id,
+        userId: user.id,
+        socketId: this.socketGateway.socketId,
+      });
+      //소켓 연결
+      this.socketGateway.server
+        .in(this.socketGateway.socketId)
+        .socketsJoin(findMultiRun.id.toString());
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('참가 실패', 400);
+    }
+
     return { success: true };
   }
 
@@ -133,11 +142,17 @@ export class MultiRoomService {
     if (checkOwner[0])
       throw new HttpException('본인이 소유한 방은 떠나기 불가능합니다', 400);
 
-    await this.multiRoomMemberRepository.delete(findMultiRun.id, user.id);
-    await this.roomStatusRepository.deleteByUserId(user.id);
-    this.socketGateway.server
-      .in(this.socketGateway.socketId)
-      .socketsLeave(findMultiRun.id.toString());
+    try {
+      await this.multiRoomMemberRepository.delete(findMultiRun.id, user.id);
+      await this.roomStatusRepository.deleteByUserId(user.id);
+      this.socketGateway.server
+        .in(this.socketGateway.socketId)
+        .socketsLeave(findMultiRun.id.toString());
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('방 떠나기 실패', 400);
+    }
+
     return { success: true };
   }
 
@@ -154,12 +169,17 @@ export class MultiRoomService {
     );
     if (!isOwner[0])
       throw new HttpException('방을 삭제할 권한이 없습니다', 400);
+    try {
+      await this.multiRoomRepository.delete(findMultiRun.id);
+      await this.roomStatusRepository.deleteByRoomId(findMultiRun.id);
+    } catch (err) {
+      console.error(err);
+      throw new HttpException('방 삭제 실패', 400);
+    }
 
-    await this.multiRoomRepository.delete(findMultiRun.id);
     const getJob = await this.globalCacheService.getCache(`roomJob:${roomId}`);
     if (getJob) await this.globalCacheService.deleteCache(getJob);
     await this.globalCacheService.deleteCache(`roomJob:${roomId}`);
-    await this.roomStatusRepository.deleteByRoomId(findMultiRun.id);
     return { success: true };
   }
 
@@ -180,9 +200,11 @@ export class MultiRoomService {
     let currentRoom = [],
       openRoomList = [];
     if (currentParticipatedRoom.length > 0) {
+      console.log(currentParticipatedRoom);
       currentRoom = await this.multiRoomRepository.findOpenRoom(
         currentParticipatedRoom[0].roomId,
       );
+      console.log(currentRoom);
       openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
         currentRoom[0].id,
       );
