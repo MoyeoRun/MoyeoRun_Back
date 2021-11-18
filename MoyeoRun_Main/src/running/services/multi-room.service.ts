@@ -169,7 +169,8 @@ export class MultiRoomService {
   async findMultiRoomList(user: DeserializeAccessToken): Promise<any> {
     const currentParticipatedRoom =
       await this.roomStatusRepository.findByUserId(user.id);
-    let currentRoom, openRoomList;
+    let currentRoom = [],
+      openRoomList = [];
     if (currentParticipatedRoom.length > 0) {
       currentRoom = await this.multiRoomRepository.findOpenRoom(
         currentParticipatedRoom[0].roomId,
