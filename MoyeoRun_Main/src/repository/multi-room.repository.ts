@@ -21,7 +21,13 @@ export class MultiRoomRepository {
       where: {
         id,
       },
-      include: { multiRoomMember: true },
+      include: {
+        multiRoomMember: {
+          include: {
+            multiRoomUser: true,
+          },
+        },
+      },
     });
   }
 
