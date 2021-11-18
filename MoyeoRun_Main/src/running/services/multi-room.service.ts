@@ -61,19 +61,32 @@ export class MultiRoomService {
     }
 
     // Job 등록
-    const result = await this.jobsService.addJobMultiRunBroadCast(
+    const autoStartJob = await this.jobsService.addJobMultiRunBroadCastStart(
       multiRoom.id,
       body.startDate,
     );
-    const delay = subTime(new Date(multiRoom.startDate), new Date()) + 50;
+    const autoStartJobCacheTtl =
+      subTime(new Date(multiRoom.startDate), new Date()) + 50;
     await this.globalCacheService.setCache(
       `roomJob:${multiRoom.id}`,
-      `bull:multiRun:${result.id}`,
+      `bull:multiRun:${autoStartJob.id}`,
       {
-        ttl: delay,
+        ttl: autoStartJobCacheTtl,
       },
     );
-
+    const prepareJob = await this.jobsService.prepareMultiRunBroadCast(
+      multiRoom.id,
+      body.startDate,
+    );
+    const prepareJobCacheTtl =
+      subTime(new Date(multiRoom.startDate), new Date()) + 50;
+    await this.globalCacheService.setCache(
+      `roomNotiJob:${multiRoom.id}`,
+      `bull:multiRun:${prepareJob.id}`,
+      {
+        ttl: prepareJobCacheTtl,
+      },
+    );
     return multiRoom;
   }
 
@@ -180,6 +193,13 @@ export class MultiRoomService {
     const getJob = await this.globalCacheService.getCache(`roomJob:${roomId}`);
     if (getJob) await this.globalCacheService.deleteCache(getJob);
     await this.globalCacheService.deleteCache(`roomJob:${roomId}`);
+
+    const getPrepareJob = await this.globalCacheService.getCache(
+      `roomNotiJob:${roomId}`,
+    );
+    if (getPrepareJob) await this.globalCacheService.deleteCache(getPrepareJob);
+    await this.globalCacheService.deleteCache(`roomNotiJob:${roomId}`);
+
     return { success: true };
   }
 
