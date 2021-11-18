@@ -32,7 +32,7 @@ model MultiRoom {
   status          multiRunStatus
   description     String?           @db.Text
   startDate       DateTime          @map("start_date")
-  targetDistance  Int               @map("target_distance")
+  targetDistance  Float             @map("target_distance")
   targetTime      Int               @map("target_time")
   limitMember     Int               @map("limit_member")
   multiRoomMember MultiRoomMember[]
