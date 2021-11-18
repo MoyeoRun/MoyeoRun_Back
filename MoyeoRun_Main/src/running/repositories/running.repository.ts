@@ -4,9 +4,10 @@ import { ClientSession, Model } from 'mongoose';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import {
   analysisRunningListBetweenTerm,
+  RunningRequest,
   updateRunningDatabase,
 } from '../dto/running.dto';
-import { SingleRunningRequest } from '../dto/single-running.dto';
+import { RunningType } from '../running.type';
 import { Runnings } from '../schemas/runnings.schema';
 
 @Injectable()
@@ -16,7 +17,7 @@ export class RunningRepository {
   ) {}
 
   async create(
-    data: SingleRunningRequest,
+    data: RunningRequest,
     user: DeserializeAccessToken,
     session: ClientSession,
   ): Promise<Runnings> {
@@ -35,6 +36,10 @@ export class RunningRepository {
     return await this.runningModel.findOne().where({ _id: id });
   }
 
+  async findManyInMultiRoomUser(ids: string[]): Promise<Runnings[]> {
+    return await this.runningModel.find().where({ _id: ids });
+  }
+
   async findByUserBetweenTerm(
     user: DeserializeAccessToken,
     start: Date,
@@ -42,6 +47,9 @@ export class RunningRepository {
   ): Promise<Runnings[]> {
     return await this.runningModel.find({
       user: user,
+      type: {
+        $ne: RunningType['multi'],
+      },
       createdAt: {
         $gte: start,
         $lte: end,

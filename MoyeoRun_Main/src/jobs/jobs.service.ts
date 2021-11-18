@@ -20,4 +20,15 @@ export class JobsService {
     );
     return job;
   }
+
+  async finishMultiRunBroadCast(roomId: number, targetTime: number) {
+    return await this.multiRunQueue.add(
+      'multiRunningFinish',
+      { roomId },
+      {
+        removeOnComplete: true,
+        delay: targetTime,
+      },
+    );
+  }
 }

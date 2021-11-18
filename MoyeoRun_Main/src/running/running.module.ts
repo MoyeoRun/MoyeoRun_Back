@@ -14,8 +14,8 @@ import { RunningRepository } from './repositories/running.repository';
 import { RunData, RunDataSchema } from './schemas/run-data.schema';
 import { Runnings, RunningSchema } from './schemas/runnings.schema';
 import { MultiRoomService } from './services/multi-room.service';
+import { MultiRunningService } from './services/multi-running.service';
 import { RunningService } from './services/running.service';
-import { SingleRunningService } from './services/single-running.service';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -29,7 +29,7 @@ import { SingleRunningService } from './services/single-running.service';
   ],
   controllers: [RunningController, MultiRoomController],
   providers: [
-    SingleRunningService,
+    MultiRunningService,
     RunningService,
     RunningRepository,
     RunDataRepository,

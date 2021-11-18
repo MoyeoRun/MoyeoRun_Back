@@ -63,13 +63,14 @@ export class MultiRoomService {
       body.startDate,
     );
     const delay = subTime(new Date(multiRoom.startDate), new Date()) + 50;
-    await this.globalCacheService.createCache(
-      `room-${multiRoom.id}`,
+    await this.globalCacheService.setCache(
+      `roomJob:${multiRoom.id}`,
       `bull:multiRun:${result.id}`,
       {
         ttl: delay,
       },
     );
+
     return multiRoom;
   }
 
@@ -136,8 +137,6 @@ export class MultiRoomService {
   }
 
   async deleteMultiRoom(user: DeserializeAccessToken, roomId: string) {
-    console.log(roomId);
-
     const findMultiRun = await this.multiRoomRepository.findById(
       parseInt(roomId),
     );
@@ -149,9 +148,9 @@ export class MultiRoomService {
       throw new HttpException('방을 삭제할 권한이 없습니다', 403);
 
     await this.multiRoomRepository.delete(findMultiRun.id);
-    const getJob = await this.globalCacheService.getCache(`room-${roomId}`);
-    await this.globalCacheService.deleteCache(getJob);
-    await this.globalCacheService.deleteCache(`room-${roomId}`);
+    const getJob = await this.globalCacheService.getCache(`roomJob:${roomId}`);
+    if (getJob) await this.globalCacheService.deleteCache(getJob);
+    await this.globalCacheService.deleteCache(`roomJob:${roomId}`);
     await this.roomStatusRepository.deleteByRoomId(findMultiRun.id);
     return '방 삭제 성공';
   }
@@ -165,5 +164,25 @@ export class MultiRoomService {
 
     if (!findMultiRun) throw new HttpException('존재하지 않는 방입니다', 400);
     return findMultiRun;
+  }
+
+  async findMultiRoomList(user: DeserializeAccessToken): Promise<any> {
+    const currentParticipatedRoom =
+      await this.roomStatusRepository.findByUserId(user.id);
+    let currentRoom = [],
+      openRoomList = [];
+    if (currentParticipatedRoom.length > 0) {
+      currentRoom = await this.multiRoomRepository.findOpenRoom(
+        currentParticipatedRoom[0].roomId,
+      );
+      openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
+        currentRoom[0].id,
+      );
+    }
+
+    return {
+      currentRoom,
+      openRoomList,
+    };
   }
 }

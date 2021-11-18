@@ -1,4 +1,4 @@
-import { MultiRoomMember, Prisma } from '.prisma/client';
+import { MultiRoom, MultiRoomMember, Prisma } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -52,6 +52,43 @@ export class MultiRoomMemberRepository {
     });
   }
 
+  async findByUserIdWithMultiRoomBetweenTerm(
+    userId: number,
+    start: Date,
+    end: Date,
+  ): Promise<
+    { multiRoom: MultiRoom & { multiRoomMember: MultiRoomMember[] } }[]
+  > {
+    return this.prisma.multiRoomMember.findMany({
+      where: {
+        userId,
+        multiRoom: {
+          startDate: {
+            gte: start,
+            lte: end,
+          },
+        },
+      },
+      select: {
+        multiRoom: {
+          include: {
+            multiRoomMember: {
+              where: { userId },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async findReadyUserByUserId(userId: number): Promise<MultiRoomMember[]> {
+    return this.prisma.multiRoomMember.findMany({
+      where: {
+        AND: [{ userId }, { isReady: true }],
+      },
+    });
+  }
+
   async findReadyUser(roomId: number): Promise<MultiRoomMember[]> {
     return this.prisma.multiRoomMember.findMany({
       where: {
@@ -65,6 +102,36 @@ export class MultiRoomMemberRepository {
       where: {
         AND: [{ roomId }, { isReady: false }],
       },
+    });
+  }
+
+  async updateRunIdByUserIdAndRoomId(
+    runId: string,
+    roomId: number,
+    userId: number,
+  ) {
+    return this.prisma.multiRoomMember.update({
+      where: {
+        roomMember: {
+          userId,
+          roomId,
+        },
+      },
+      data: {
+        runId,
+      },
+    });
+  }
+
+  async updateRankByUserId(roomId: number, userId: number, rank: number) {
+    return this.prisma.multiRoomMember.update({
+      where: {
+        roomMember: {
+          roomId,
+          userId,
+        },
+      },
+      data: { rank },
     });
   }
 }

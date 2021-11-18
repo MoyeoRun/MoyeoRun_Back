@@ -32,7 +32,7 @@ model MultiRoom {
   status          multiRunStatus
   description     String?           @db.Text
   startDate       DateTime          @map("start_date")
-  targetDistance  Int               @map("target_distance")
+  targetDistance  Float             @map("target_distance")
   targetTime      Int               @map("target_time")
   limitMember     Int               @map("limit_member")
   multiRoomMember MultiRoomMember[]
@@ -44,6 +44,7 @@ model MultiRoomMember {
   roomId        Int        @map("room_id")
   userId        Int        @map("user_id")
   runId         String?    @map("run_id")
+  rank          Int?
   isOwner       Boolean    @default(false) @map("is_owner")
   isReady       Boolean    @default(false) @map("is_ready")
   multiRoom     MultiRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -64,5 +65,6 @@ model RoomStatus {
 
 enum multiRunStatus {
   Open
+  Running
   Close
 }

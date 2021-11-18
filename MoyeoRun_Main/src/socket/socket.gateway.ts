@@ -12,9 +12,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GlobalCacheService } from 'src/cache/global.cache.service';
+import { JobsService } from 'src/jobs/jobs.service';
 import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
 import { MultiRoomRepository } from 'src/repository/multi-room.repository';
 import { RoomStatusRepository } from 'src/repository/room-status.repository';
+import { RunDataType } from 'src/running/running.type';
 
 @WebSocketGateway({ cors: true, transports: ['websocket'] })
 export class SocketGateway
@@ -25,6 +27,7 @@ export class SocketGateway
     private readonly multiRoomRepository: MultiRoomRepository,
     private readonly multiRoomMemberRepository: MultiRoomMemberRepository,
     private readonly globalCacheService: GlobalCacheService,
+    private readonly jobsService: JobsService,
   ) {}
   @WebSocketServer() public server: Server;
   public socketId: string;
@@ -40,56 +43,56 @@ export class SocketGateway
     @ConnectedSocket() socket: Socket,
   ) {
     try {
-      //방이 없는 경우 생성
-      if (!this.roomStatus[`${data.roomId}`]) {
-        const findRoom = await this.multiRoomRepository.findById(data.roomId);
-        console.log(findRoom);
-        this.roomStatus[`${data.roomId}`] = {};
-        this.roomStatus[`${data.roomId}`]['connectedUserId'] = [];
-        this.roomStatus[`${data.roomId}`]['multiRoomMember'] =
-          findRoom.multiRoomMember.length;
-        this.roomStatus[`${data.roomId}`]['targetTime'] = findRoom.targetTime;
-      }
-
-      //이미 신청한 경우 false;
-      if (
-        this.roomStatus[`${data.roomId}`]['connectedUserId'].includes(
+      //이미 신청한 경우 false
+      const alreadyUser =
+        await this.multiRoomMemberRepository.findReadyUserByUserId(
           data.user.id,
-        )
-      ) {
-        return false;
-      }
+        );
+      if (alreadyUser[0]) return false;
 
-      const multiMember = await this.multiRoomMemberRepository.updateReady(
+      //멤버 레디로 바꾸고
+      await this.multiRoomMemberRepository.updateReady(
         data.roomId,
         data.user.id,
       );
-      this.roomStatus[`${data.roomId}`]['connectedUserId'].push(
-        multiMember.userId,
-      );
 
-      this.server.in(data.roomId.toString()).emit('roomStatus', {
-        connectedUserId: this.roomStatus[`${data.roomId}`]['connectedUserId'],
+      //룸정보찾고
+      const findRoom = await this.multiRoomRepository.findById(data.roomId);
+
+      //룸에서 레디 유저만 가져와서
+      const readyUsers = findRoom.multiRoomMember.filter((data) => {
+        data.isReady == true;
       });
-      console.log(this.roomStatus[`${data.roomId}`]);
+
+      //레디 유저 전송
+      this.server.in(data.roomId.toString()).emit('roomStatus', {
+        connectedUserId: readyUsers,
+      });
 
       //모두 다 참여한 경우
-      if (
-        this.roomStatus[`${data.roomId}`][`multiRoomMember`] ==
-        this.roomStatus[`${data.roomId}`]['connectedUserId'].length
-      ) {
-        await this.multiRoomRepository.updateClose(data.roomId);
+      if (findRoom.multiRoomMember.length == readyUsers.length) {
+        await this.multiRoomRepository.updateRunning(data.roomId);
         this.server.in(data.roomId.toString()).emit('start', {
           message: '러닝시작.',
           roomId: data.roomId,
         });
 
-        this.globalCacheService.createCache(
-          `running-${data.roomId}`,
-          this.roomStatus[`${data.roomId}`][
-            'connectedUserId'
-          ].length.toString(),
-          { ttl: this.roomStatus[`${data.roomId}`]['targetTime'] / 1000 + 600 },
+        this.globalCacheService.setCache(
+          `running:${data.roomId}`,
+          readyUsers.length.toString(),
+          { ttl: findRoom.targetTime / 1000 + 60 },
+        );
+
+        const finishMultiRunBroadCast =
+          await this.jobsService.finishMultiRunBroadCast(
+            data.roomId,
+            findRoom.targetTime,
+          );
+
+        this.globalCacheService.setCache(
+          `runningFinishJob:${data.roomId}`,
+          String(finishMultiRunBroadCast.id),
+          { ttl: findRoom.targetTime / 1000 },
         );
       }
     } catch (err) {
@@ -129,6 +132,14 @@ export class SocketGateway
       console.log(err);
       throw new HttpException('연결실패', 500);
     }
+  }
+
+  @SubscribeMessage('runData')
+  async handleRunData(
+    @MessageBody() data: { runData: RunDataType; roomId: number },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    socket.in(String(data.roomId)).emit('runBroadCast', data.runData);
   }
 
   async handleConnection(@ConnectedSocket() socket: Socket) {

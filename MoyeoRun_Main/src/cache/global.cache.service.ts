@@ -5,7 +5,7 @@ import { Cache } from 'cache-manager';
 export class GlobalCacheService {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  async createCache(key: string, value: string, option?: any): Promise<string> {
+  async setCache(key: string, value: string, option?: any): Promise<string> {
     return this.cacheManager.set(key, value, option);
   }
 

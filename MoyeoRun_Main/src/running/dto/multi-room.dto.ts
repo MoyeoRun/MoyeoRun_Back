@@ -1,4 +1,11 @@
-import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { MultiRoom } from '.prisma/client';
+import {
+  IsDateString,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class MultiRoomCreateRequest {
   @IsOptional()
@@ -27,4 +34,12 @@ export class MultiRoomCreateRequest {
 export class MultiRoomParams {
   @IsNumber()
   roomId: number;
+}
+
+export class MultiListElement {
+  @IsObject()
+  multiRoom: MultiRoom;
+
+  @IsNumber()
+  rank: number;
 }
