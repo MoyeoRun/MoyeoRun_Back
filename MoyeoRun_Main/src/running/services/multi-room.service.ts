@@ -221,14 +221,14 @@ export class MultiRoomService {
       openRoomList = [];
     if (currentParticipatedRoom.length > 0) {
       console.log(currentParticipatedRoom);
-      currentRoom = await this.multiRoomRepository.findOpenRoom(
+      currentRoom = await this.multiRoomRepository.findOpenRoomById(
         currentParticipatedRoom[0].roomId,
       );
-    }
-    console.log(currentRoom);
-    openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
-      currentRoom[0].id,
-    );
+      console.log(currentRoom);
+      openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
+        currentRoom[0].id,
+      );
+    } else openRoomList = await this.multiRoomRepository.findOpenRoom();
 
     return {
       currentRoom,
