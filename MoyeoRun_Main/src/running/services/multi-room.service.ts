@@ -224,11 +224,11 @@ export class MultiRoomService {
       currentRoom = await this.multiRoomRepository.findOpenRoom(
         currentParticipatedRoom[0].roomId,
       );
-      console.log(currentRoom);
-      openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
-        currentRoom[0].id,
-      );
     }
+    console.log(currentRoom);
+    openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
+      currentRoom[0].id,
+    );
 
     return {
       currentRoom,
