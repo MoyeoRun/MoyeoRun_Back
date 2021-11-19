@@ -113,14 +113,12 @@ export class MultiRunningService {
       delete body.roomId;
       const runningResponse = await this.runningService.runEnd(user, body);
       await this.roomStatusRepository.deleteByUserId(user.id);
-      const testLogging =
-        await this.multiRoomMemberRepository.updateRunIdByUserIdAndRoomId(
-          runningResponse.id,
-          roomId,
-          user.id,
-        );
-      await this.updateMultiRank(body.roomId);
-      console.log(testLogging);
+      await this.multiRoomMemberRepository.updateRunIdByUserIdAndRoomId(
+        runningResponse.id,
+        roomId,
+        user.id,
+      );
+      await this.updateMultiRank(roomId);
 
       return runningResponse;
     } catch (err) {
