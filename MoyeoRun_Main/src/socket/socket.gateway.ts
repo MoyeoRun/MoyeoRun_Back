@@ -103,19 +103,19 @@ export class SocketGateway
 
   @SubscribeMessage('join')
   async handleJoin(
-    @MessageBody() data: { userId: string },
+    @MessageBody() data: { userId: number },
     @ConnectedSocket() socket: Socket,
   ) {
     //연결 수립
     try {
       const participatedRoom = await this.roomStatusRepository.findByUserId(
-        parseInt(data.userId),
+        data.userId,
       );
       let findRoom;
       if (participatedRoom.length > 0) {
         console.log('룸 존재');
         await this.roomStatusRepository.updateSocketIdByUserId(
-          parseInt(data.userId),
+          data.userId,
           socket.id,
         );
         socket.join(participatedRoom[0].roomId.toString());
@@ -141,10 +141,13 @@ export class SocketGateway
 
   @SubscribeMessage('runData')
   async handleRunData(
-    @MessageBody() data: { runData: RunDataType; roomId: number },
+    @MessageBody()
+    data: { userId: number; runData: RunDataType[]; roomId: number },
     @ConnectedSocket() socket: Socket,
   ) {
-    socket.in(String(data.roomId)).emit('runBroadCast', data.runData);
+    socket
+      .in(String(data.roomId))
+      .emit('runBroadCast', { runData: data.runData, userId: data.userId });
   }
 
   async handleConnection(@ConnectedSocket() socket: Socket) {
