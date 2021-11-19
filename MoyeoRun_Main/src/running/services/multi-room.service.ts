@@ -57,7 +57,7 @@ export class MultiRoomService {
         .socketsJoin(multiRoom.id.toString());
     } catch (err) {
       console.error(err);
-      throw new HttpException('방 생성 실패', 500);
+      throw new HttpException('방 생성 실패', 400);
     }
 
     // Job 등록

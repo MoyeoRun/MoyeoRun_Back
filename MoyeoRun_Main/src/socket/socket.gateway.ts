@@ -15,6 +15,7 @@ import { GlobalCacheService } from 'src/cache/global.cache.service';
 import { JobsService } from 'src/jobs/jobs.service';
 import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
 import { MultiRoomRepository } from 'src/repository/multi-room.repository';
+import { MultiRoomWithMember } from 'src/repository/prisma.type';
 import { RoomStatusRepository } from 'src/repository/room-status.repository';
 import { RunDataType } from 'src/running/running.type';
 
@@ -111,7 +112,8 @@ export class SocketGateway
       const participatedRoom = await this.roomStatusRepository.findByUserId(
         data.userId,
       );
-      let findRoom;
+      let findRoom: MultiRoomWithMember | null;
+      let findRoomMember;
       if (participatedRoom.length > 0) {
         console.log('룸 존재');
         await this.roomStatusRepository.updateSocketIdByUserId(
@@ -122,15 +124,18 @@ export class SocketGateway
         findRoom = await this.multiRoomRepository.findById(
           participatedRoom[0].roomId,
         );
+        findRoomMember = findRoom.multiRoomMember.filter(
+          (member) => member.userId == data.userId,
+        );
         //룸 정보 전송
       }
       const participatedRoomId = participatedRoom[0]
         ? participatedRoom[0].roomId
         : null;
-
       socket.emit('welcome', {
         roomId: participatedRoomId,
         status: findRoom ? findRoom.status : null,
+        isReady: findRoomMember ? findRoomMember[0].isReady : null,
       });
       this.logger.log('연결성공');
     } catch (err) {
