@@ -87,10 +87,16 @@ export class MultiRoomMemberRepository {
     });
   }
 
-  async findReadyUserByUserId(userId: number): Promise<MultiRoomMember[]> {
+  async findReadyUserByUserId(
+    userId: number,
+    roomId: number,
+  ): Promise<MultiRoomMember[]> {
+    console.log(roomId);
     return this.prisma.multiRoomMember.findMany({
       where: {
-        AND: [{ userId }, { isReady: true }],
+        userId,
+        roomId,
+        isReady: true,
       },
     });
   }
