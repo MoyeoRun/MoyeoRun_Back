@@ -71,6 +71,7 @@ export class JobsConsumer {
 
   @Process('multiRunningPrepare')
   async multiRunningPrepare(job: Job) {
+    await this.multiRoomRepository.updateReady(parseInt(job.data.roomId));
     this.socketGateway.server
       .in(job.data.roomId.toString())
       .emit('prepare', '곧 러닝이 시작합니다.');

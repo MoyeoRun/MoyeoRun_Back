@@ -37,6 +37,15 @@ export class MultiRoomRepository {
     });
   }
 
+  async updateReady(id: number): Promise<MultiRoom> {
+    return this.prisma.multiRoom.update({
+      where: { id },
+      data: {
+        status: 'Ready',
+      },
+    });
+  }
+
   async updateRunning(id: number): Promise<MultiRoom> {
     return this.prisma.multiRoom.update({
       where: { id },

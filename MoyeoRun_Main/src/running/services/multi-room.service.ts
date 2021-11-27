@@ -2,7 +2,7 @@ import { MultiRoom } from '.prisma/client';
 import { HttpException, Injectable } from '@nestjs/common';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { GlobalCacheService } from 'src/cache/global.cache.service';
-import { subTime, subTimeByMillisecond } from 'src/common/utils/day.util';
+import { subTime } from 'src/common/utils/day.util';
 import { MultiRoomWithMember } from 'src/repository/prisma.type';
 import { RoomStatusRepository } from 'src/repository/room-status.repository';
 import { SocketGateway } from 'src/socket/socket.gateway';
@@ -106,9 +106,10 @@ export class MultiRoomService {
       throw new HttpException('방 인원이 꽉 찼습니다', 400);
     }
     // 시작 10초 이전에 참석하려고 한 경우
-    if (subTimeByMillisecond(new Date(findMultiRun.startDate)) < 10000) {
-      throw new HttpException('참여하실 수 없습니다', 400);
+    if (!(findMultiRun.status == 'Open')) {
+      throw new HttpException('Open 방이 아닙니다', 400);
     }
+
     try {
       await this.multiRoomMemberRepository.create({
         roomId: findMultiRun.id,
