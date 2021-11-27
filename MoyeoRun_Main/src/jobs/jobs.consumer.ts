@@ -25,7 +25,7 @@ export class JobsConsumer {
     const findRoom = await this.multiRoomRepository.findById(
       parseInt(job.data.roomId),
     );
-    if (findRoom.status != 'Open') {
+    if (findRoom.status != 'Ready') {
       return false;
     } else {
       const readyUser = await this.multiRoomMemberRepository.findReadyUser(
