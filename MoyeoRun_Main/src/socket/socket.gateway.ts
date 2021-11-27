@@ -15,6 +15,7 @@ import { GlobalCacheService } from 'src/cache/global.cache.service';
 import { JobsService } from 'src/jobs/jobs.service';
 import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repository';
 import { MultiRoomRepository } from 'src/repository/multi-room.repository';
+import { MultiRoomWithMember } from 'src/repository/prisma.type';
 import { RoomStatusRepository } from 'src/repository/room-status.repository';
 import { RunDataType } from 'src/running/running.type';
 
@@ -42,14 +43,23 @@ export class SocketGateway
     @MessageBody() data: { roomId: number; user: User },
     @ConnectedSocket() socket: Socket,
   ) {
+    this.logger.log(
+      `userId:${data.user.id} User send ready event to Room: ${data.roomId}`,
+    );
     try {
       //이미 신청한 경우 false
       const alreadyUser =
         await this.multiRoomMemberRepository.findReadyUserByUserId(
           data.user.id,
+          data.roomId,
         );
-      if (alreadyUser[0]) return false;
-
+      if (alreadyUser[0]) {
+        socket.emit('readyError', {
+          error: null,
+          message: '중복 전송 불가',
+        });
+        return false;
+      }
       //멤버 레디로 바꾸고
       await this.multiRoomMemberRepository.updateReady(
         data.roomId,
@@ -58,10 +68,9 @@ export class SocketGateway
 
       //룸정보찾고
       const findRoom = await this.multiRoomRepository.findById(data.roomId);
-
       //룸에서 레디 유저만 가져와서
       const readyUsers = findRoom.multiRoomMember.filter((data) => {
-        data.isReady == true;
+        return data.isReady == true;
       });
 
       //레디 유저 전송
@@ -97,40 +106,48 @@ export class SocketGateway
       }
     } catch (err) {
       console.error(err);
-      socket.emit('readyError', err);
+      socket.emit('readyError', {
+        error: err,
+        message: '알수없는에러',
+      });
     }
   }
 
   @SubscribeMessage('join')
   async handleJoin(
-    @MessageBody() data: { userId: string },
+    @MessageBody() data: { userId: number },
     @ConnectedSocket() socket: Socket,
   ) {
     //연결 수립
+    this.logger.log(`userId${data.userId} User send join Event`);
     try {
       const participatedRoom = await this.roomStatusRepository.findByUserId(
-        parseInt(data.userId),
+        data.userId,
       );
-      let findRoom;
+      let findRoom: MultiRoomWithMember | null;
+      let findRoomMember;
       if (participatedRoom.length > 0) {
         console.log('룸 존재');
         await this.roomStatusRepository.updateSocketIdByUserId(
-          parseInt(data.userId),
+          data.userId,
           socket.id,
         );
         socket.join(participatedRoom[0].roomId.toString());
         findRoom = await this.multiRoomRepository.findById(
           participatedRoom[0].roomId,
         );
+        findRoomMember = findRoom.multiRoomMember.filter(
+          (member) => member.userId == data.userId,
+        );
         //룸 정보 전송
       }
       const participatedRoomId = participatedRoom[0]
         ? participatedRoom[0].roomId
         : null;
-
       socket.emit('welcome', {
         roomId: participatedRoomId,
         status: findRoom ? findRoom.status : null,
+        isReady: findRoomMember ? findRoomMember[0].isReady : null,
       });
       this.logger.log('연결성공');
     } catch (err) {
@@ -141,10 +158,15 @@ export class SocketGateway
 
   @SubscribeMessage('runData')
   async handleRunData(
-    @MessageBody() data: { runData: RunDataType; roomId: number },
+    @MessageBody()
+    data: { userId: number; runData: RunDataType[]; roomId: number },
     @ConnectedSocket() socket: Socket,
   ) {
-    socket.in(String(data.roomId)).emit('runBroadCast', data.runData);
+    this.logger.log(`userId${data.userId} User send runData Event`);
+
+    socket
+      .in(String(data.roomId))
+      .emit('runBroadCast', { runData: data.runData, userId: data.userId });
   }
 
   async handleConnection(@ConnectedSocket() socket: Socket) {

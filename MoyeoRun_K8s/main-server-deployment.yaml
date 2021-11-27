@@ -23,7 +23,7 @@ spec:
           envFrom:
             - secretRef:
                 name: main-secrets
-          image: dnatuna/moyeorun-main-server:0.0.6
+          image: dnatuna/moyeorun-main-server:0.0.12
           name: main-server
           ports:
             - containerPort: 3000

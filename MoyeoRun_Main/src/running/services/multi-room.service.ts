@@ -57,7 +57,7 @@ export class MultiRoomService {
         .socketsJoin(multiRoom.id.toString());
     } catch (err) {
       console.error(err);
-      throw new HttpException('방 생성 실패', 500);
+      throw new HttpException('방 생성 실패', 400);
     }
 
     // Job 등록
@@ -221,14 +221,14 @@ export class MultiRoomService {
       openRoomList = [];
     if (currentParticipatedRoom.length > 0) {
       console.log(currentParticipatedRoom);
-      currentRoom = await this.multiRoomRepository.findOpenRoom(
+      currentRoom = await this.multiRoomRepository.findOpenRoomById(
         currentParticipatedRoom[0].roomId,
       );
       console.log(currentRoom);
       openRoomList = await this.multiRoomRepository.findOpenRoomListWithoutId(
         currentRoom[0].id,
       );
-    }
+    } else openRoomList = await this.multiRoomRepository.findOpenRoom();
 
     return {
       currentRoom,
