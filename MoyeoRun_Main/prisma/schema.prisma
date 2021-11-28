@@ -65,6 +65,7 @@ model RoomStatus {
 
 enum multiRunStatus {
   Open
+  Ready
   Running
   Close
 }

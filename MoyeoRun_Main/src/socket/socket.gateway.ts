@@ -127,7 +127,6 @@ export class SocketGateway
       let findRoom: MultiRoomWithMember | null;
       let findRoomMember;
       if (participatedRoom.length > 0) {
-        console.log('룸 존재');
         await this.roomStatusRepository.updateSocketIdByUserId(
           data.userId,
           socket.id,
