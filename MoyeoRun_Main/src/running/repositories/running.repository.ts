@@ -40,7 +40,7 @@ export class RunningRepository {
     return await this.runningModel.find().where({ _id: ids });
   }
 
-  async findByUserBetweenTerm(
+  async findByUserAndNotMultiBetweenTerm(
     user: DeserializeAccessToken,
     start: Date,
     end: Date,
@@ -50,6 +50,21 @@ export class RunningRepository {
       type: {
         $ne: RunningType['multi'],
       },
+      createdAt: {
+        $gte: start,
+        $lte: end,
+      },
+    });
+  }
+
+  async findByUserAndMultiBetweenTerm(
+    user: DeserializeAccessToken,
+    start: Date,
+    end: Date,
+  ): Promise<Runnings[]> {
+    return await this.runningModel.find({
+      user: user,
+      type: RunningType['multi'],
       createdAt: {
         $gte: start,
         $lte: end,

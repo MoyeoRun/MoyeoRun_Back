@@ -10,13 +10,13 @@ import {
 import { User } from 'src/auth/decorators/auth.decorator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { JwtAccessAuthGuard } from 'src/auth/guards/access-jwt-auth.guard';
-import { MultiListElement } from '../dto/multi-room.dto';
 import {
+  MultiRunningListResponse,
   MultiRunningRequest,
   RunningListRequest,
-  RunningListResponse,
   RunningRequest,
   RunningResponse,
+  SingleRunningListResponse,
 } from '../dto/running.dto';
 import { MultiRunningService } from '../services/multi-running.service';
 import { RunningService } from '../services/running.service';
@@ -51,7 +51,7 @@ export class RunningController {
   getSingleRunList(
     @User() user: DeserializeAccessToken,
     @Query() params: RunningListRequest,
-  ): Promise<RunningListResponse> {
+  ): Promise<SingleRunningListResponse> {
     return this.runningService.getSingleRunList(user, params);
   }
 
@@ -60,7 +60,7 @@ export class RunningController {
   getMultiRunList(
     @User() user: DeserializeAccessToken,
     @Query() params: RunningListRequest,
-  ): Promise<MultiListElement[]> {
+  ): Promise<MultiRunningListResponse> {
     return this.runningService.getMultiRunList(user, params);
   }
 

@@ -7,14 +7,17 @@ import { MultiRoomMemberRepository } from 'src/repository/multi-room-member.repo
 import { MultiRoomRepository } from 'src/repository/multi-room.repository';
 import { MultiListElement } from '../dto/multi-room.dto';
 import {
+  analysisRunningListBetweenTerm,
+  MultiRunningListResponse,
   RunningListRequest,
-  RunningListResponse,
   RunningRequest,
   RunningResponse,
   RunSummary,
+  SingleRunningListResponse,
 } from '../dto/running.dto';
 import { RunDataRepository } from '../repositories/run-data.repository';
 import { RunningRepository } from '../repositories/running.repository';
+import { RunningType } from '../running.type';
 import { Runnings } from '../schemas/runnings.schema';
 
 @Injectable()
@@ -107,6 +110,64 @@ export class RunningService {
     return runSummary;
   }
 
+  private async calculateTerm(
+    user: DeserializeAccessToken,
+    type: RunningType,
+    params: RunningListRequest,
+  ): Promise<{
+    totalDistance: number;
+    totalTime: number;
+    totalAveragePace: number;
+    analysisRunningListBetweenTerm: analysisRunningListBetweenTerm[];
+    findRunning: Runnings[];
+  }> {
+    let findRunning: Runnings[];
+    if (type === RunningType['multi']) {
+      findRunning = await this.runningRepository.findByUserAndMultiBetweenTerm(
+        user,
+        new Date(params.start),
+        new Date(params.end),
+      );
+    } else {
+      findRunning =
+        await this.runningRepository.findByUserAndNotMultiBetweenTerm(
+          user,
+          new Date(params.start),
+          new Date(params.end),
+        );
+    }
+
+    if (!findRunning) {
+      throw new HttpException('러닝이 존재하지 않습니다', 204);
+    }
+
+    const analysisRunningListBetweenTerm =
+      await this.runningRepository.countByCreatedAtBetweenTerm(
+        user,
+        new Date(params.start),
+        new Date(params.end),
+      );
+
+    let totalDistance = 0,
+      totalTime = 0,
+      totalAveragePace = 0;
+
+    analysisRunningListBetweenTerm.map((data) => {
+      totalDistance += data.totalDistanceOfTerm;
+      totalTime += data.totalTimeOfTerm;
+      totalAveragePace += data.averagePaceOfTerm;
+    });
+    totalAveragePace /= analysisRunningListBetweenTerm.length;
+
+    return {
+      totalDistance,
+      totalTime,
+      totalAveragePace,
+      analysisRunningListBetweenTerm,
+      findRunning,
+    };
+  }
+
   async getRunning(id: string): Promise<RunningResponse> {
     try {
       const findRunning = await this.runningRepository.findById(id);
@@ -138,37 +199,17 @@ export class RunningService {
   async getSingleRunList(
     user: DeserializeAccessToken,
     params: RunningListRequest,
-  ): Promise<RunningListResponse> {
+  ): Promise<SingleRunningListResponse> {
     try {
-      const findRunning = await this.runningRepository.findByUserBetweenTerm(
-        user,
-        new Date(params.start),
-        new Date(params.end),
-      );
+      const {
+        totalDistance,
+        totalAveragePace,
+        totalTime,
+        analysisRunningListBetweenTerm,
+        findRunning,
+      } = await this.calculateTerm(user, RunningType['free'], params);
 
-      if (!findRunning) {
-        throw new HttpException('러닝이 존재하지 않습니다', 204);
-      }
-
-      const analysisRunningListBetweenTerm =
-        await this.runningRepository.countByCreatedAtBetweenTerm(
-          user,
-          new Date(params.start),
-          new Date(params.end),
-        );
-
-      let totalDistance = 0,
-        totalTime = 0,
-        totalAveragePace = 0;
-
-      analysisRunningListBetweenTerm.map((data) => {
-        totalDistance += data.totalDistanceOfTerm;
-        totalTime += data.totalTimeOfTerm;
-        totalAveragePace += data.averagePaceOfTerm;
-      });
-      totalAveragePace /= analysisRunningListBetweenTerm.length;
-
-      const runningListResponse: RunningListResponse = {
+      const runningListResponse: SingleRunningListResponse = {
         totalTime,
         totalDistance,
         totalAveragePace,
@@ -189,7 +230,13 @@ export class RunningService {
   async getMultiRunList(
     user: DeserializeAccessToken,
     params: RunningListRequest,
-  ): Promise<MultiListElement[]> {
+  ): Promise<MultiRunningListResponse> {
+    const {
+      totalDistance,
+      totalAveragePace,
+      totalTime,
+      analysisRunningListBetweenTerm,
+    } = await this.calculateTerm(user, RunningType['multi'], params);
     const multiList =
       await this.multiRoomMemberRepository.findByUserIdWithMultiRoomBetweenTerm(
         user.id,
@@ -207,7 +254,14 @@ export class RunningService {
       });
     });
 
-    return multiListResponse;
+    const runningListResponse: MultiRunningListResponse = {
+      totalTime,
+      totalDistance,
+      totalAveragePace,
+      analysisRunningListBetweenTerm,
+      runningList: multiListResponse,
+    };
+    return runningListResponse;
   }
 
   async getMultiRun(user: DeserializeAccessToken, id: number) {
