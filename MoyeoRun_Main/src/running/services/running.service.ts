@@ -122,7 +122,9 @@ export class RunningService {
     findRunning: Runnings[];
   }> {
     let findRunning: Runnings[];
-    if (type === RunningType['multi']) {
+    console.log(type);
+    console.log(typeof type);
+    if (type == RunningType['multi']) {
       findRunning = await this.runningRepository.findByUserAndMultiBetweenTerm(
         user,
         new Date(params.start),
@@ -141,12 +143,22 @@ export class RunningService {
       throw new HttpException('러닝이 존재하지 않습니다', 204);
     }
 
-    const analysisRunningListBetweenTerm =
-      await this.runningRepository.countByCreatedAtBetweenTerm(
-        user,
-        new Date(params.start),
-        new Date(params.end),
-      );
+    let analysisRunningListBetweenTerm;
+    if (type == RunningType['multi']) {
+      analysisRunningListBetweenTerm =
+        await this.runningRepository.countByCreatedAtAndMultiBetweenTerm(
+          user,
+          new Date(params.start),
+          new Date(params.end),
+        );
+    } else {
+      analysisRunningListBetweenTerm =
+        await this.runningRepository.countByCreatedAtAndNotMultiBetweenTerm(
+          user,
+          new Date(params.start),
+          new Date(params.end),
+        );
+    }
 
     let totalDistance = 0,
       totalTime = 0,

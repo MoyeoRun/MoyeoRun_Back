@@ -107,13 +107,51 @@ export class RunningRepository {
     );
   }
 
-  async countByCreatedAtBetweenTerm(
+  async countByCreatedAtAndNotMultiBetweenTerm(
     user: DeserializeAccessToken,
     start: Date,
     end: Date,
   ): Promise<analysisRunningListBetweenTerm[]> {
     return await this.runningModel.aggregate([
       { $match: { user: user } },
+      { $match: { type: { $ne: RunningType['multi'] } } },
+      { $match: { createdAt: { $gte: start, $lte: end } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            day: { $dayOfMonth: '$createdAt' },
+          },
+          count: { $sum: 1 },
+          distance: { $sum: '$runDistance' },
+          time: { $sum: '$runTime' },
+          pace: { $avg: '$runPace' },
+          first: { $min: '$createdAt' },
+        },
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          date: '$first',
+          count: 1,
+          totalDistanceOfTerm: '$distance',
+          totalTimeOfTerm: '$time',
+          averagePaceOfTerm: '$pace',
+          _id: 0,
+        },
+      },
+    ]);
+  }
+
+  async countByCreatedAtAndMultiBetweenTerm(
+    user: DeserializeAccessToken,
+    start: Date,
+    end: Date,
+  ): Promise<analysisRunningListBetweenTerm[]> {
+    return await this.runningModel.aggregate([
+      { $match: { user: user } },
+      { $match: { type: RunningType['multi'] } },
       { $match: { createdAt: { $gte: start, $lte: end } } },
       {
         $group: {
