@@ -115,7 +115,7 @@ export class MultiRoomRepository {
       include: {
         multiRoomMember: {
           include: {
-            multiRoomUser: true,
+            multiRoomUser: false,
           },
         },
       },
