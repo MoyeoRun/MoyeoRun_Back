@@ -113,7 +113,11 @@ export class MultiRoomRepository {
         id,
       },
       include: {
-        multiRoomMember: true,
+        multiRoomMember: {
+          include: {
+            multiRoomUser: true,
+          },
+        },
       },
     });
   }

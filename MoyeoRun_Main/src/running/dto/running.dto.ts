@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { DeserializeAccessToken } from 'src/auth/dto/auth.dto';
 import { RunDataType, RunningType } from '../running.type';
+import { MultiListElement } from './multi-room.dto';
 
 export class RunningRequest {
   @IsEnum(RunningType)
@@ -51,7 +52,7 @@ export class RunningListRequest {
   end: Date;
 }
 
-export class RunningListResponse {
+export class SingleRunningListResponse {
   @IsNumber()
   totalDistance: number;
 
@@ -66,6 +67,23 @@ export class RunningListResponse {
 
   @IsObject()
   runningList: RunningResponse[];
+}
+
+export class MultiRunningListResponse {
+  @IsNumber()
+  totalDistance: number;
+
+  @IsNumber()
+  totalAveragePace: number;
+
+  @IsNumber()
+  totalTime: number;
+
+  @IsObject()
+  analysisRunningListBetweenTerm: analysisRunningListBetweenTerm[];
+
+  @IsObject()
+  runningList: MultiListElement[];
 }
 
 export class updateRunningDatabase {
