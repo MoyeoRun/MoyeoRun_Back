@@ -71,7 +71,7 @@ export class SingleRunningListResponse {
 
 export class MultiRunningListResponse {
   @IsNumber()
-  totalDistance: number;
+  totalDistance: long;
 
   @IsNumber()
   totalAveragePace: number;
